@@ -1,14 +1,40 @@
 import React from 'react';
 import { useGoogleLogin } from '@react-oauth/google';
 import { useNavigate } from 'react-router-dom';
+import axios from 'axios';
+import { supabase } from '../supabaseClient';
 
 function Home() {
   const navigate = useNavigate();
 
   const login = useGoogleLogin({
-    onSuccess: (codeResponse) => {
-      console.log(codeResponse);
-      navigate('/dashboard');
+    onSuccess: async (codeResponse) => {
+      try {
+        const { data } = await axios.get('https://www.googleapis.com/oauth2/v3/userinfo', {
+          headers: { Authorization: `Bearer ${codeResponse.access_token}` },
+        });
+
+        // Store user data in Supabase
+        const { data: userData, error } = await supabase
+          .from('users')
+          .upsert({
+            google_id: data.sub,
+            email: data.email,
+            name: data.name,
+            avatar_url: data.picture,
+            created_at: new Date().toISOString(),
+          }, { onConflict: 'google_id' });
+
+        if (error) {
+          console.error('Error storing user data:', error);
+        } else {
+          console.log('User data stored successfully:', userData);
+        }
+
+        navigate('/dashboard');
+      } catch (error) {
+        console.error('Error fetching user data:', error);
+      }
     },
     onError: (error) => console.log('Login Failed:', error),
     flow: 'implicit',
