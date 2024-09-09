@@ -42,5 +42,4 @@ function SignUpButton() {
     </button>
   );
 }
-
 export default SignUpButton;
