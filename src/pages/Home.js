@@ -11,8 +11,7 @@ function Home() {
       navigate('/dashboard');
     },
     onError: (error) => console.log('Login Failed:', error),
-    flow: 'auth-code',
-    ux_mode: 'popup',
+    flow: 'implicit',
   });
 
   return (
