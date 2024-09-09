@@ -7,7 +7,8 @@ import Home from './pages/Home';
 import Dashboard from './pages/Dashboard';
 import SignUp from './pages/SignUp';
 
-const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID || '1023513542549-j040udoik41uev4038coh3h8i6nnui0l.apps.googleusercontent.com';
+const CLIENT_ID = process.env.REACT_APP_GOOGLE_CLIENT_ID;
+
 function App() {
   return (
     <GoogleOAuthProvider clientId={CLIENT_ID}>
