@@ -12,10 +12,7 @@ function Home() {
     },
     onError: (error) => console.log('Login Failed:', error),
     flow: 'auth-code',
-    ux_mode: 'redirect',
-    redirect_uri: process.env.NODE_ENV === 'production' 
-      ? 'https://truembti.com/dashboard'
-      : 'http://localhost:3000/dashboard'
+    ux_mode: 'popup',
   });
 
   return (

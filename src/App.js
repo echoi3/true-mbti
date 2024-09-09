@@ -20,7 +20,6 @@ function App() {
               <Route path="/" element={<Home />} />
               <Route path="/signup" element={<SignUp />} />
               <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/oauth/redirect" element={<Dashboard />} />
             </Routes>
           </main>
           <Footer />
