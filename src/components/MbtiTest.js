@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { doc, getDoc, updateDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, updateDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 
 function MbtiTest() {
@@ -10,10 +10,11 @@ function MbtiTest() {
 
   useEffect(() => {
     const fetchUserId = async () => {
-      const docRef = doc(db, 'uniqueUrls', uniqueId);
-      const docSnap = await getDoc(docRef);
-      if (docSnap.exists()) {
-        setUserId(docSnap.data().userId);
+      const usersRef = collection(db, 'users');
+      const q = query(usersRef, where('uniqueId', '==', uniqueId));
+      const querySnapshot = await getDocs(q);
+      if (!querySnapshot.empty) {
+        setUserId(querySnapshot.docs[0].id);
       }
     };
     fetchUserId();
@@ -21,8 +22,7 @@ function MbtiTest() {
 
   const handleTestSubmit = async (testResult) => {
     if (userId) {
-      const userRef = doc(db, 'users', userId);
-      await updateDoc(userRef, {
+      await updateDoc(doc(db, 'users', userId), {
         mbtiResults: testResult,
         // You can add more fields or logic here to update the user's MBTI
       });
