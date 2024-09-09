@@ -38,9 +38,23 @@ function Dashboard() {
   const handleGenerateUrl = async () => {
     const user = auth.currentUser;
     if (user) {
-      const newUniqueUrl = await generateUniqueUrl(user.uid);
-      setUniqueUrl(newUniqueUrl);
-      console.log('Unique URL:', newUniqueUrl);
+      try {
+        console.log('Generating URL for user:', user.uid);
+        const newUniqueUrl = await generateUniqueUrl(user.uid);
+        setUniqueUrl(newUniqueUrl);
+        console.log('New Unique URL:', newUniqueUrl);
+        
+        // Fetch updated user data to ensure state is in sync
+        const docRef = doc(db, 'users', user.uid);
+        const docSnap = await getDoc(docRef);
+        if (docSnap.exists()) {
+          setUserData(docSnap.data());
+        }
+      } catch (error) {
+        console.error('Error generating unique URL:', error);
+      }
+    } else {
+      console.error('No authenticated user found');
     }
   };
 
@@ -54,7 +68,10 @@ function Dashboard() {
           {uniqueUrl ? (
             <div>
               <p>Your unique MBTI test URL:</p>
-              <a href={uniqueUrl} target="_blank" rel="noopener noreferrer">{uniqueUrl}</a>
+              <a href={uniqueUrl} onClick={(e) => {
+                e.preventDefault();
+                window.location.href = uniqueUrl;
+              }}>{uniqueUrl}</a>
             </div>
           ) : (
             <button onClick={handleGenerateUrl}>Generate Unique URL</button>
