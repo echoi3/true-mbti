@@ -144,8 +144,10 @@ function Dashboard() {
   };
 
   const renderDistributionBar = (leftLabel, rightLabel, percentage, leftLetter, rightLetter) => {
-    const leftPercentage = percentage;
-    const rightPercentage = 100 - percentage;
+    const leftPercentage = parseFloat(percentage).toFixed(1);
+    const rightPercentage = (100 - parseFloat(percentage)).toFixed(1);
+    const isLeftDominant = parseFloat(leftPercentage) > 50;
+    const dominantPercentage = isLeftDominant ? leftPercentage : rightPercentage;
 
     return (
       <div className="mb-4">
@@ -153,18 +155,22 @@ function Dashboard() {
           <span className="font-semibold">{leftLetter} - {leftLabel}</span>
           <span className="font-semibold">{rightLetter} - {rightLabel}</span>
         </div>
-        <div className="flex h-4 rounded-full overflow-hidden">
+        <div className="flex h-8 rounded-full overflow-hidden relative">
           <div 
-            className="bg-indigo-400 transition-all duration-500 ease-out"
+            className="bg-indigo-400 transition-all duration-500 ease-out flex items-center justify-center"
             style={{width: `${leftPercentage}%`}}
           >
-            <span className="px-2 text-xs font-bold flex items-center h-full text-indigo-800">{leftPercentage}%</span>
+            {isLeftDominant && (
+              <span className="absolute text-xs font-bold text-white z-10">{dominantPercentage}%</span>
+            )}
           </div>
           <div 
-            className="bg-purple-400 transition-all duration-500 ease-out"
+            className="bg-purple-400 transition-all duration-500 ease-out flex items-center justify-center"
             style={{width: `${rightPercentage}%`}}
           >
-            <span className="px-2 text-xs font-bold flex items-center h-full justify-end text-purple-800">{rightPercentage}%</span>
+            {!isLeftDominant && (
+              <span className="absolute text-xs font-bold text-white z-10">{dominantPercentage}%</span>
+            )}
           </div>
         </div>
       </div>
@@ -192,10 +198,10 @@ function Dashboard() {
               <div className="text-center">
                 <p className="text-gray-600 mb-4">Please sign in to view your dashboard.</p>
                 <button
-                  onClick={() => navigate('/')}
+                  onClick={() => navigate('/signup')}
                   className="bg-indigo-600 text-white rounded-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                 >
-                  Go to Home
+                  Sign In
                 </button>
               </div>
             ) : (
@@ -245,10 +251,10 @@ function Dashboard() {
                       {getMbtiDescription(mbtiResult)}
                     </p>
                     <div className="space-y-4">
-                      {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI, 'E', 'I')}
-                      {renderDistributionBar('Intuitive', 'Observant', mbtiDistribution.NS, 'N', 'S')}
-                      {renderDistributionBar('Thinking', 'Feeling', mbtiDistribution.TF, 'T', 'F')}
-                      {renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP, 'J', 'P')}
+                    {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI.toFixed(2), 'E', 'I')}
+                    {renderDistributionBar('Intuitive', 'Observant', mbtiDistribution.NS.toFixed(2), 'N', 'S')}
+{renderDistributionBar('Thinking', 'Feeling', mbtiDistribution.TF.toFixed(2), 'T', 'F')}
+{renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP.toFixed(2), 'J', 'P')}
                     </div>
                   </motion.div>
                 )}

@@ -3,6 +3,7 @@ import { useParams } from 'react-router-dom';
 import { collection, query, where, getDocs, limit, doc, updateDoc, arrayUnion } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { motion, AnimatePresence } from 'framer-motion';
+import { httpsCallable, getFunctions } from 'firebase/functions';
 
 const questions = [
   { id: 1, text: "[FIRST_NAME] prefers to spend time in large groups rather than one-on-one.", category: "E" },
@@ -52,7 +53,6 @@ function MbtiTest() {
   useEffect(() => {
     const fetchUserData = async () => {
       try {
-        console.log('Fetching user with uniqueId:', uniqueId);
         const usersRef = collection(db, 'users');
         const q = query(usersRef, where('uniqueId', '==', uniqueId), limit(1));
         const querySnapshot = await getDocs(q);
@@ -60,7 +60,6 @@ function MbtiTest() {
         if (!querySnapshot.empty) {
           const userDoc = querySnapshot.docs[0];
           const userData = userDoc.data();
-          console.log('User data:', userData);
           setUserId(userDoc.id);
           setUserName(userData.name ? userData.name.split(' ')[0] : 'User');
         } else {
@@ -163,6 +162,18 @@ function MbtiTest() {
         mbtiResults: arrayUnion(testResult)
       });
       setTestCompleted(true);
+      await sendEmailNotification(userId, userName);
+    }
+  };
+
+  const sendEmailNotification = async (userId, testTakerName) => {
+    try {
+      const functions = getFunctions();
+      const sendEmail = httpsCallable(functions, 'sendEmailNotification');
+      const result = await sendEmail({ userId, testTakerName });
+      console.log('Email notification sent successfully', result.data);
+    } catch (error) {
+      console.error('Error sending email notification:', error);
     }
   };
 
