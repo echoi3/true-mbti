@@ -15,6 +15,7 @@ function Dashboard() {
   const [mbtiResult, setMbtiResult] = useState(null);
   const [mbtiDistribution, setMbtiDistribution] = useState(null);
   const [submissionCount, setSubmissionCount] = useState(0);
+  const [urlGenerated, setUrlGenerated] = useState(false);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -74,6 +75,8 @@ function Dashboard() {
       try {
         const newUniqueUrl = await generateUniqueUrl(user.uid);
         setUniqueUrl(newUniqueUrl);
+        setUrlGenerated(true);
+        setTimeout(() => setUrlGenerated(false), 3000); // Hide notification after 3 seconds
         
         const docRef = doc(db, 'users', user.uid);
         const docSnap = await getDoc(docRef);
@@ -206,6 +209,23 @@ function Dashboard() {
                         ? "1 sweetheart has submitted a test for you" 
                         : `${submissionCount} sweethearts have submitted tests for you`}
                     </p>
+                  </div>
+                )}
+                {submissionCount === 0 && (
+                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
+                    <h3 className="text-lg font-medium text-blue-800 mb-2">Welcome to TrueMBTI!</h3>
+                    <p className="text-blue-700 mb-2">Here's how to get started:</p>
+                    <ol className="list-decimal list-inside text-blue-700">
+                      <li>{uniqueUrl ? "Share your unique MBTI test URL with friends and family who know you well" : "Generate your unique MBTI test URL using the button below"}</li>
+                      <li>Ask them to complete the MBTI test about you</li>
+                      <li>Come back to see your results as they submit their assessments</li>
+                    </ol>
+                  </div>
+                )}
+                {urlGenerated && (
+                  <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
+                    <p className="font-bold">Success!</p>
+                    <p>Your unique MBTI test URL has been generated.</p>
                   </div>
                 )}
                 {mbtiResult && mbtiDistribution && (
