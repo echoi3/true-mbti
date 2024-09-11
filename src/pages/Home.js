@@ -1,6 +1,7 @@
 import React from 'react';
 import SignUpButton from '../components/SignUpButton';
 import HowItWorks from '../components/HowItWorks';
+import MBTIDistribution from '../components/MBTIDistribution';
 
 function Home() {
   return (
@@ -19,8 +20,9 @@ function Home() {
             </div>
           </div>
         </div>
-
+        
         <HowItWorks />
+        <MBTIDistribution />
       </div>
     </div>
   );

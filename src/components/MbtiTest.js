@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { collection, query, where, getDocs, limit, doc, updateDoc, arrayUnion } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { motion, AnimatePresence } from 'framer-motion';
 import { httpsCallable, getFunctions } from 'firebase/functions';
@@ -158,9 +158,34 @@ function MbtiTest() {
         takenBy: uniqueId
       };
 
-      await updateDoc(doc(db, 'users', userId), {
-        mbtiResults: arrayUnion(testResult)
+      const userRef = doc(db, 'users', userId);
+      const userDoc = await getDoc(userRef);
+      const userData = userDoc.data();
+      
+      let newAverageMBTI = result;
+      let newAverageDistribution = distribution;
+
+      if (userData.averageMBTI) {
+        const totalTests = (userData.mbtiResults?.length || 0) + 1;
+        newAverageDistribution = {
+          EI: (userData.averageDistribution.EI * (totalTests - 1) + distribution.EI) / totalTests,
+          NS: (userData.averageDistribution.NS * (totalTests - 1) + distribution.NS) / totalTests,
+          TF: (userData.averageDistribution.TF * (totalTests - 1) + distribution.TF) / totalTests,
+          JP: (userData.averageDistribution.JP * (totalTests - 1) + distribution.JP) / totalTests
+        };
+        newAverageMBTI = 
+          (newAverageDistribution.EI > 50 ? 'E' : 'I') +
+          (newAverageDistribution.NS > 50 ? 'N' : 'S') +
+          (newAverageDistribution.TF > 50 ? 'T' : 'F') +
+          (newAverageDistribution.JP > 50 ? 'J' : 'P');
+      }
+
+      await updateDoc(userRef, {
+        mbtiResults: arrayUnion(testResult),
+        averageMBTI: newAverageMBTI,
+        averageDistribution: newAverageDistribution
       });
+
       setTestCompleted(true);
       await sendEmailNotification(userId, userName);
     }
@@ -324,33 +349,34 @@ function MbtiTest() {
   }
 
   function renderDistributionBar(leftLabel, rightLabel, percentage, leftLetter, rightLetter) {
-    const leftPercentage = percentage;
-    const rightPercentage = 100 - percentage;
-    const dominantSide = leftPercentage > rightPercentage ? 'left' : 'right';
+    const leftPercentage = parseFloat(percentage).toFixed(1);
+    const rightPercentage = (100 - parseFloat(percentage)).toFixed(1);
+    const isLeftDominant = parseFloat(leftPercentage) > 50;
+    const dominantPercentage = isLeftDominant ? leftPercentage : rightPercentage;
 
     return (
       <div className="mb-4">
         <div className="flex justify-between text-sm mb-1">
-          <span className={`font-semibold ${dominantSide === 'left' ? 'text-yellow-600' : 'text-gray-600'}`}>{leftPercentage}%</span>
-          <span className={`font-semibold ${dominantSide === 'right' ? 'text-indigo-600' : 'text-gray-600'}`}>{rightPercentage}%</span>
+          <span className="font-semibold">{leftLetter} - {leftLabel}</span>
+          <span className="font-semibold">{rightLetter} - {rightLabel}</span>
         </div>
-        <div className="flex h-6 rounded-full overflow-hidden">
+        <div className="flex h-8 rounded-full overflow-hidden relative">
           <div 
-            className="bg-yellow-400 transition-all duration-500 ease-out"
+            className="bg-indigo-400 transition-all duration-500 ease-out flex items-center justify-center"
             style={{width: `${leftPercentage}%`}}
           >
-            <span className="px-2 text-xs font-bold flex items-center h-full text-yellow-800">{leftPercentage}%</span>
+            {isLeftDominant && (
+              <span className="absolute text-xs font-bold text-white z-10">{dominantPercentage}%</span>
+            )}
           </div>
           <div 
-            className="bg-indigo-400 transition-all duration-500 ease-out"
+            className="bg-purple-400 transition-all duration-500 ease-out flex items-center justify-center"
             style={{width: `${rightPercentage}%`}}
           >
-            <span className="px-2 text-xs font-bold flex items-center h-full justify-end text-indigo-800">{rightPercentage}%</span>
+            {!isLeftDominant && (
+              <span className="absolute text-xs font-bold text-white z-10">{dominantPercentage}%</span>
+            )}
           </div>
-        </div>
-        <div className="flex justify-between text-xs mt-1 text-gray-600">
-          <span>{leftLetter} - {leftLabel}</span>
-          <span>{rightLetter} - {rightLabel}</span>
         </div>
       </div>
     );
