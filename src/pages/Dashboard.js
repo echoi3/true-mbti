@@ -125,22 +125,22 @@ function Dashboard() {
 
   const getMbtiDescription = (mbti) => {
     const descriptions = {
-      ISTJ: "🏛️ Quiet, serious, earn success by thoroughness and dependability.",
-      ISFJ: "🤝 Quiet, friendly, responsible, and conscientious.",
+      ISTJ: "⚖️ Quiet, serious, earn success by thoroughness and dependability.",
+      ISFJ: "🏠 Quiet, friendly, responsible, and conscientious.",
       INFJ: "🔮 Seek meaning and connection in ideas, relationships, and material possessions.",
-      INTJ: "🧠 Have original minds and great drive for implementing their ideas and achieving their goals.",
-      ISTP: "🔧 Tolerant and flexible, quiet observers until a problem appears, then act quickly to find workable solutions.",
+      INTJ: "🔬 Have original minds and great drive for implementing their ideas and achieving their goals.",
+      ISTP: "🛠️ Tolerant and flexible, quiet observers until a problem appears, then act quickly to find workable solutions.",
       ISFP: "🎨 Quiet, friendly, sensitive, and kind. Enjoy the present moment, what's going on around them.",
-      INFP: "🌟 Idealistic, loyal to their values and to people who are important to them.",
-      INTP: "💡 Seek to develop logical explanations for everything that interests them.",
-      ESTP: "🏄 Flexible and tolerant, they take a pragmatic approach focused on immediate results.",
-      ESFP: "🎉 Outgoing, friendly, and accepting. Exuberant lovers of life, people, and material comforts.",
-      ENFP: "🌈 Warmly enthusiastic and imaginative. See life as full of possibilities.",
-      ENTP: "🎭 Quick, ingenious, stimulating, alert, and outspoken.",
+      INFP: "🌿 Idealistic, loyal to their values and to people who are important to them.",
+      INTP: "🧩 Seek to develop logical explanations for everything that interests them.",
+      ESTP: "🏄‍♂️ Flexible and tolerant, they take a pragmatic approach focused on immediate results.",
+      ESFP: "🎭 Outgoing, friendly, and accepting. Exuberant lovers of life, people, and material comforts.",
+      ENFP: "🦋 Warmly enthusiastic and imaginative. See life as full of possibilities.",
+      ENTP: "💡 Quick, ingenious, stimulating, alert, and outspoken.",
       ESTJ: "📊 Practical, realistic, matter-of-fact. Decisive, quickly move to implement decisions.",
       ESFJ: "🤗 Warmhearted, conscientious, and cooperative. Want harmony in their environment.",
       ENFJ: "🌻 Warm, empathetic, responsive, and responsible.",
-      ENTJ: "👑 Frank, decisive, assume leadership readily."
+      ENTJ: "🏆 Frank, decisive, assume leadership readily."
     };
     return descriptions[mbti] || "A unique combination of personality traits.";
   };
@@ -193,11 +193,32 @@ function Dashboard() {
     if (mbtiResultRef.current) {
       try {
         const canvas = await html2canvas(mbtiResultRef.current);
-        const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
-        const link = document.createElement('a');
-        link.download = 'my-mbti-result.png';
-        link.href = image;
-        link.click();
+        canvas.toBlob(async (blob) => {
+          if (blob) {
+            const file = new File([blob], 'my-mbti-result.png', { type: 'image/png' });
+            
+            if (navigator.share) {
+              try {
+                await navigator.share({
+                  files: [file],
+                  title: 'My MBTI Result',
+                  text: 'Check out my MBTI result!',
+                });
+                console.log('MBTI result shared successfully');
+              } catch (error) {
+                console.error('Error sharing MBTI result:', error);
+              }
+            } else {
+              // Fallback for browsers that don't support Web Share API
+              const url = URL.createObjectURL(blob);
+              const link = document.createElement('a');
+              link.download = 'my-mbti-result.png';
+              link.href = url;
+              link.click();
+              URL.revokeObjectURL(url);
+            }
+          }
+        }, 'image/png');
       } catch (error) {
         console.error('Error generating image:', error);
       }
@@ -205,22 +226,22 @@ function Dashboard() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-3xl mx-auto">
+    <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-purple-100 py-6 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md mx-auto">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
           className="bg-white shadow-xl rounded-lg overflow-hidden"
         >
-          <div className="bg-indigo-600 px-6 py-4">
-            <h1 className="text-3xl font-bold text-white">Dashboard</h1>
+          <div className="bg-indigo-600 px-4 py-3">
+            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
           </div>
           {userData && (
-            <div className="px-6 py-4">
-              <h2 className="text-2xl font-bold mb-2">Welcome, {userData.name.split(' ')[0]}!</h2>
-              <p className="text-gray-600 mb-4">Email: {userData.email}</p>
-              <p className="text-lg font-semibold text-indigo-600 mb-6">
+            <div className="px-4 py-3">
+              <h2 className="text-xl font-bold mb-2">Welcome, {userData.name.split(' ')[0]}!</h2>
+              <p className="text-sm text-gray-600 mb-2">Email: {userData.email}</p>
+              <p className="text-base font-semibold text-indigo-600 mb-4">
                 {submissionCount === 1 
                   ? "1 amazing individual has submitted a test for you" 
                   : `${submissionCount} amazing individuals have submitted tests for you`}
@@ -228,17 +249,17 @@ function Dashboard() {
             </div>
           )}
           {mbtiResult && mbtiDistribution && (
-            <div ref={mbtiResultRef} className="bg-indigo-50 rounded-lg p-6 mb-6">
-              <h3 className="text-xl font-semibold text-indigo-800 mb-4">Your Average MBTI:</h3>
-              <div className="flex flex-col items-center justify-center mb-6">
-                <div className="w-20 h-20 rounded-full bg-indigo-200 flex items-center justify-center mb-2">
-                  <span className="text-3xl">{getMbtiEmoji(mbtiResult)}</span>
+            <div ref={mbtiResultRef} className="bg-indigo-50 rounded-lg p-4 mb-4">
+              <h3 className="text-lg font-semibold text-indigo-800 mb-3">Your Average MBTI:</h3>
+              <div className="flex flex-col items-center justify-center mb-4">
+                <div className="w-16 h-16 rounded-full bg-indigo-200 flex items-center justify-center mb-2">
+                  <span className="text-2xl">{getMbtiEmoji(mbtiResult)}</span>
                 </div>
                 <div className="flex flex-col items-center">
-                  <span className="text-3xl font-bold text-indigo-800 mt-2">{mbtiResult}</span>
+                  <span className="text-2xl font-bold text-indigo-800 mt-1">{mbtiResult}</span>
                 </div>
               </div>
-              <p className="text-center text-indigo-600 font-medium mb-6">
+              <p className="text-sm text-center text-indigo-600 font-medium mb-4">
                 {getMbtiDescription(mbtiResult)}
               </p>
               {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI, 'E', 'I')}
@@ -247,10 +268,10 @@ function Dashboard() {
               {renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP, 'J', 'P')}
             </div>
           )}
-          <div className="px-6 py-4">
+          <div className="px-4 py-3">
             <button
               onClick={handleShareResult}
-              className="w-full bg-green-600 text-white rounded-md px-4 py-2 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
+              className="w-full bg-green-600 text-white rounded-md px-4 py-2 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-3"
             >
               Share My Result
             </button>
