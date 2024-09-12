@@ -2,11 +2,21 @@ import React from 'react';
 import SignUpButton from '../components/SignUpButton';
 import HowItWorks from '../components/HowItWorks';
 import MBTIDistribution from '../components/MBTIDistribution';
+import { Link } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
+import { useNavigate } from 'react-router-dom';
+import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
+import { auth } from '../firebaseConfig';
 
 function Home() {
+  const { currentUser } = useAuth();
+  const navigate = useNavigate();
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-purple-100">
-      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8 py-8 relative">
+        
+        
         <div className="text-center mb-8">
           <h1 className="text-5xl font-extrabold text-gray-900 sm:text-6xl md:text-7xl mb-6">
             Discover Your True MBTI
@@ -22,7 +32,6 @@ function Home() {
         </div>
         
         <HowItWorks />
-        <MBTIDistribution />
       </div>
     </div>
   );

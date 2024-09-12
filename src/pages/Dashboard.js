@@ -1,10 +1,11 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { auth, db } from '../firebaseConfig';
 import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firestore';
 import { signOut } from 'firebase/auth';
 import { generateUniqueUrl } from '../utils/urlGenerator';
 import { motion } from 'framer-motion';
+import html2canvas from 'html2canvas';
 
 function Dashboard() {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ function Dashboard() {
   const [mbtiDistribution, setMbtiDistribution] = useState(null);
   const [submissionCount, setSubmissionCount] = useState(0);
   const [urlGenerated, setUrlGenerated] = useState(false);
+  const mbtiResultRef = useRef(null);
 
   useEffect(() => {
     const unsubscribe = auth.onAuthStateChanged(async (user) => {
@@ -123,24 +125,34 @@ function Dashboard() {
 
   const getMbtiDescription = (mbti) => {
     const descriptions = {
-      ISTJ: "Quiet, serious, earn success by thoroughness and dependability.",
-      ISFJ: "Quiet, friendly, responsible, and conscientious.",
-      INFJ: "Seek meaning and connection in ideas, relationships, and material possessions.",
-      INTJ: "Have original minds and great drive for implementing their ideas and achieving their goals.",
-      ISTP: "Tolerant and flexible, quiet observers until a problem appears, then act quickly to find workable solutions.",
-      ISFP: "Quiet, friendly, sensitive, and kind. Enjoy the present moment, what's going on around them.",
-      INFP: "Idealistic, loyal to their values and to people who are important to them.",
-      INTP: "Seek to develop logical explanations for everything that interests them.",
-      ESTP: "Flexible and tolerant, they take a pragmatic approach focused on immediate results.",
-      ESFP: "Outgoing, friendly, and accepting. Exuberant lovers of life, people, and material comforts.",
-      ENFP: "Warmly enthusiastic and imaginative. See life as full of possibilities.",
-      ENTP: "Quick, ingenious, stimulating, alert, and outspoken.",
-      ESTJ: "Practical, realistic, matter-of-fact. Decisive, quickly move to implement decisions.",
-      ESFJ: "Warmhearted, conscientious, and cooperative. Want harmony in their environment.",
-      ENFJ: "Warm, empathetic, responsive, and responsible.",
-      ENTJ: "Frank, decisive, assume leadership readily."
+      ISTJ: "🏛️ Quiet, serious, earn success by thoroughness and dependability.",
+      ISFJ: "🤝 Quiet, friendly, responsible, and conscientious.",
+      INFJ: "🔮 Seek meaning and connection in ideas, relationships, and material possessions.",
+      INTJ: "🧠 Have original minds and great drive for implementing their ideas and achieving their goals.",
+      ISTP: "🔧 Tolerant and flexible, quiet observers until a problem appears, then act quickly to find workable solutions.",
+      ISFP: "🎨 Quiet, friendly, sensitive, and kind. Enjoy the present moment, what's going on around them.",
+      INFP: "🌟 Idealistic, loyal to their values and to people who are important to them.",
+      INTP: "💡 Seek to develop logical explanations for everything that interests them.",
+      ESTP: "🏄 Flexible and tolerant, they take a pragmatic approach focused on immediate results.",
+      ESFP: "🎉 Outgoing, friendly, and accepting. Exuberant lovers of life, people, and material comforts.",
+      ENFP: "🌈 Warmly enthusiastic and imaginative. See life as full of possibilities.",
+      ENTP: "🎭 Quick, ingenious, stimulating, alert, and outspoken.",
+      ESTJ: "📊 Practical, realistic, matter-of-fact. Decisive, quickly move to implement decisions.",
+      ESFJ: "🤗 Warmhearted, conscientious, and cooperative. Want harmony in their environment.",
+      ENFJ: "🌻 Warm, empathetic, responsive, and responsible.",
+      ENTJ: "👑 Frank, decisive, assume leadership readily."
     };
     return descriptions[mbti] || "A unique combination of personality traits.";
+  };
+
+  const getMbtiEmoji = (mbti) => {
+    const emojis = {
+      ISTJ: "⚖️", ISFJ: "🏠", INFJ: "🔮", INTJ: "🔬",
+      ISTP: "🛠️", ISFP: "🎨", INFP: "🌿", INTP: "🧩",
+      ESTP: "🏄‍♂️", ESFP: "🎭", ENFP: "🦋", ENTP: "💡",
+      ESTJ: "📊", ESFJ: "🤗", ENFJ: "🌻", ENTJ: "🏆"
+    };
+    return emojis[mbti] || "🧠";
   };
 
   const renderDistributionBar = (leftLabel, rightLabel, percentage, leftLetter, rightLetter) => {
@@ -177,6 +189,21 @@ function Dashboard() {
     );
   };
 
+  const handleShareResult = async () => {
+    if (mbtiResultRef.current) {
+      try {
+        const canvas = await html2canvas(mbtiResultRef.current);
+        const image = canvas.toDataURL("image/png").replace("image/png", "image/octet-stream");
+        const link = document.createElement('a');
+        link.download = 'my-mbti-result.png';
+        link.href = image;
+        link.click();
+      } catch (error) {
+        console.error('Error generating image:', error);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-purple-100 py-12 px-4 sm:px-6 lg:px-8">
       <div className="max-w-3xl mx-auto">
@@ -189,109 +216,50 @@ function Dashboard() {
           <div className="bg-indigo-600 px-6 py-4">
             <h1 className="text-3xl font-bold text-white">Dashboard</h1>
           </div>
-          <div className="p-6">
-            {isLoading ? (
-              <div className="text-center">
-                <p className="text-gray-600">Loading...</p>
+          {userData && (
+            <div className="px-6 py-4">
+              <h2 className="text-2xl font-bold mb-2">Welcome, {userData.name.split(' ')[0]}!</h2>
+              <p className="text-gray-600 mb-4">Email: {userData.email}</p>
+              <p className="text-lg font-semibold text-indigo-600 mb-6">
+                {submissionCount === 1 
+                  ? "1 amazing individual has submitted a test for you" 
+                  : `${submissionCount} amazing individuals have submitted tests for you`}
+              </p>
+            </div>
+          )}
+          {mbtiResult && mbtiDistribution && (
+            <div ref={mbtiResultRef} className="bg-indigo-50 rounded-lg p-6 mb-6">
+              <h3 className="text-xl font-semibold text-indigo-800 mb-4">Your Average MBTI:</h3>
+              <div className="flex flex-col items-center justify-center mb-6">
+                <div className="w-20 h-20 rounded-full bg-indigo-200 flex items-center justify-center mb-2">
+                  <span className="text-3xl">{getMbtiEmoji(mbtiResult)}</span>
+                </div>
+                <div className="flex flex-col items-center">
+                  <span className="text-3xl font-bold text-indigo-800 mt-2">{mbtiResult}</span>
+                </div>
               </div>
-            ) : !isAuthenticated ? (
-              <div className="text-center">
-                <p className="text-gray-600 mb-4">Please sign in to view your dashboard.</p>
-                <button
-                  onClick={() => navigate('/signup')}
-                  className="bg-indigo-600 text-white rounded-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                >
-                  Sign In
-                </button>
-              </div>
-            ) : (
-              <>
-                {userData && (
-                  <div className="mb-8">
-                    <h2 className="text-2xl font-bold mb-2">Welcome, {userData.name.split(' ')[0]}!</h2>
-                    <p className="text-gray-600">Email: {userData.email}</p>
-                    <p className="text-lg font-semibold text-indigo-600 mt-4">
-                      {submissionCount === 1 
-                        ? "1 sweetheart has submitted a test for you" 
-                        : `${submissionCount} sweethearts have submitted tests for you`}
-                    </p>
-                  </div>
-                )}
-                {submissionCount === 0 && (
-                  <div className="bg-blue-50 border-l-4 border-blue-400 p-4 mb-6">
-                    <h3 className="text-lg font-medium text-blue-800 mb-2">Welcome to TrueMBTI!</h3>
-                    <p className="text-blue-700 mb-2">Here's how to get started:</p>
-                    <ol className="list-decimal list-inside text-blue-700">
-                      <li>{uniqueUrl ? "Share your unique MBTI test URL with friends and family who know you well" : "Generate your unique MBTI test URL using the button below"}</li>
-                      <li>Ask them to complete the MBTI test about you</li>
-                      <li>Come back to see your results as they submit their assessments</li>
-                    </ol>
-                  </div>
-                )}
-                {urlGenerated && (
-                  <div className="bg-green-100 border-l-4 border-green-500 text-green-700 p-4 mb-4" role="alert">
-                    <p className="font-bold">Success!</p>
-                    <p>Your unique MBTI test URL has been generated.</p>
-                  </div>
-                )}
-                {mbtiResult && mbtiDistribution && (
-                  <motion.div
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: 0.2, duration: 0.5 }}
-                    className="bg-indigo-50 rounded-lg p-6 mb-8"
-                  >
-                    <h3 className="text-xl font-semibold text-indigo-800 mb-4">Your Average MBTI:</h3>
-                    <div className="flex items-center justify-center mb-6">
-                      <div className="w-24 h-24 bg-indigo-200 rounded-full flex items-center justify-center">
-                        <span className="text-3xl font-bold text-indigo-800">{mbtiResult}</span>
-                      </div>
-                    </div>
-                    <p className="text-center text-indigo-600 font-medium mb-6">
-                      {getMbtiDescription(mbtiResult)}
-                    </p>
-                    <div className="space-y-4">
-                    {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI.toFixed(2), 'E', 'I')}
-                    {renderDistributionBar('Intuitive', 'Observant', mbtiDistribution.NS.toFixed(2), 'N', 'S')}
-{renderDistributionBar('Thinking', 'Feeling', mbtiDistribution.TF.toFixed(2), 'T', 'F')}
-{renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP.toFixed(2), 'J', 'P')}
-                    </div>
-                  </motion.div>
-                )}
-                {uniqueUrl ? (
-                  <div className="bg-indigo-50 rounded-lg p-4 mb-6">
-                    <h3 className="text-lg font-medium text-indigo-800 mb-2">Your unique MBTI test URL:</h3>
-                    <div className="flex items-center">
-                      <input
-                        type="text"
-                        value={uniqueUrl}
-                        readOnly
-                        className="flex-grow bg-white border border-gray-300 rounded-l-md py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                      />
-                      <button
-                        onClick={() => navigator.clipboard.writeText(uniqueUrl)}
-                        className="bg-indigo-600 text-white rounded-r-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-                      >
-                        Copy
-                      </button>
-                    </div>
-                  </div>
-                ) : (
-                  <button
-                    onClick={handleGenerateUrl}
-                    className="w-full bg-indigo-600 text-white rounded-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mb-6"
-                  >
-                    Generate Unique URL
-                  </button>
-                )}
-                <button
-                  onClick={handleSignOut}
-                  className="w-full bg-red-600 text-white rounded-md px-4 py-2 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
-                >
-                  Sign Out
-                </button>
-              </>
-            )}
+              <p className="text-center text-indigo-600 font-medium mb-6">
+                {getMbtiDescription(mbtiResult)}
+              </p>
+              {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI, 'E', 'I')}
+              {renderDistributionBar('Intuitive', 'Observant', mbtiDistribution.NS, 'N', 'S')}
+              {renderDistributionBar('Thinking', 'Feeling', mbtiDistribution.TF, 'T', 'F')}
+              {renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP, 'J', 'P')}
+            </div>
+          )}
+          <div className="px-6 py-4">
+            <button
+              onClick={handleShareResult}
+              className="w-full bg-green-600 text-white rounded-md px-4 py-2 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-4"
+            >
+              Share My Result
+            </button>
+            <button
+              onClick={handleSignOut}
+              className="w-full bg-red-600 text-white rounded-md px-4 py-2 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
+            >
+              Sign Out
+            </button>
           </div>
         </motion.div>
       </div>
