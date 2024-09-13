@@ -6,37 +6,62 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { httpsCallable, getFunctions } from 'firebase/functions';
 
 const questions = [
+  // E/I questions
   { id: 1, text: "[FIRST_NAME] prefers to spend time in large groups rather than one-on-one.", category: "E" },
-  { id: 2, text: "[FIRST_NAME] often thinks about abstract concepts and theories.", category: "N" },
-  { id: 3, text: "[FIRST_NAME] makes decisions based on logic rather than emotions.", category: "T" },
-  { id: 4, text: "[FIRST_NAME] prefers to have a structured and planned approach to life.", category: "J" },
-  { id: 5, text: "[FIRST_NAME] enjoys being the center of attention.", category: "E" },
-  { id: 6, text: "[FIRST_NAME] is more interested in future possibilities than present realities.", category: "N" },
-  { id: 7, text: "[FIRST_NAME] values objectivity over personal feelings when making decisions.", category: "T" },
-  { id: 8, text: "[FIRST_NAME] likes to have a detailed plan before starting a project.", category: "J" },
-  { id: 9, text: "[FIRST_NAME] prefers to recharge by spending time alone.", category: "I" },
-  { id: 10, text: "[FIRST_NAME] focuses more on details and facts than on big picture concepts.", category: "S" },
-  { id: 11, text: "[FIRST_NAME] considers how decisions will affect others' feelings.", category: "F" },
-  { id: 12, text: "[FIRST_NAME] prefers to keep options open and be flexible.", category: "P" },
-  { id: 13, text: "[FIRST_NAME] is usually quiet and reserved in social situations.", category: "I" },
-  { id: 14, text: "[FIRST_NAME] prefers practical, hands-on experiences over theoretical discussions.", category: "S" },
-  { id: 15, text: "[FIRST_NAME] values harmony and avoiding conflict in relationships.", category: "F" },
-  { id: 16, text: "[FIRST_NAME] prefers to go with the flow rather than stick to a rigid schedule.", category: "P" },
-  { id: 17, text: "[FIRST_NAME] initiates conversations with strangers easily.", category: "E" },
-  { id: 18, text: "[FIRST_NAME] enjoys exploring new ideas and possibilities.", category: "N" },
-  { id: 19, text: "[FIRST_NAME] prefers to analyze problems logically.", category: "T" },
-  { id: 20, text: "[FIRST_NAME] likes to have things settled and decided.", category: "J" },
-  { id: 21, text: "[FIRST_NAME] finds it draining to be in social situations for extended periods.", category: "I" },
-  { id: 22, text: "[FIRST_NAME] prefers to focus on concrete facts and details.", category: "S" },
-  { id: 23, text: "[FIRST_NAME] often makes decisions based on gut feelings.", category: "F" },
-  { id: 24, text: "[FIRST_NAME] enjoys spontaneity and last-minute plans.", category: "P" },
-  { id: 25, text: "[FIRST_NAME] prefers written communication over verbal.", category: "I" },
-  { id: 26, text: "[FIRST_NAME] is often described as a practical and down-to-earth person.", category: "S" },
-  { id: 27, text: "[FIRST_NAME] tends to be empathetic and sensitive to others' emotions.", category: "F" },
-  { id: 28, text: "[FIRST_NAME] prefers to finish one project before starting another.", category: "J" },
-  { id: 29, text: "[FIRST_NAME] enjoys engaging in deep, meaningful conversations.", category: "N" },
-  { id: 30, text: "[FIRST_NAME] prefers to work in teams rather than independently.", category: "E" }
+  { id: 2, text: "[FIRST_NAME] enjoys being the center of attention.", category: "E" },
+  { id: 3, text: "[FIRST_NAME] initiates conversations with strangers easily.", category: "E" },
+  { id: 4, text: "[FIRST_NAME] prefers to work in teams rather than independently.", category: "E" },
+  { id: 5, text: "[FIRST_NAME] feels energized after social interactions.", category: "E" },
+  { id: 6, text: "[FIRST_NAME] prefers to recharge by spending time alone.", category: "I" },
+  { id: 7, text: "[FIRST_NAME] is usually quiet and reserved in social situations.", category: "I" },
+  { id: 8, text: "[FIRST_NAME] finds it draining to be in social situations for extended periods.", category: "I" },
+  { id: 9, text: "[FIRST_NAME] prefers written communication over verbal.", category: "I" },
+  { id: 10, text: "[FIRST_NAME] needs quiet time to concentrate and do their best work.", category: "I" },
+
+  // N/S questions
+  { id: 11, text: "[FIRST_NAME] often thinks about abstract concepts and theories.", category: "N" },
+  { id: 12, text: "[FIRST_NAME] is more interested in future possibilities than present realities.", category: "N" },
+  { id: 13, text: "[FIRST_NAME] enjoys exploring new ideas and possibilities.", category: "N" },
+  { id: 14, text: "[FIRST_NAME] enjoys engaging in deep, meaningful conversations.", category: "N" },
+  { id: 15, text: "[FIRST_NAME] often sees connections between seemingly unrelated things.", category: "N" },
+  { id: 16, text: "[FIRST_NAME] focuses more on details and facts than on big picture concepts.", category: "S" },
+  { id: 17, text: "[FIRST_NAME] prefers practical, hands-on experiences over theoretical discussions.", category: "S" },
+  { id: 18, text: "[FIRST_NAME] prefers to focus on concrete facts and details.", category: "S" },
+  { id: 19, text: "[FIRST_NAME] is often described as a practical and down-to-earth person.", category: "S" },
+  { id: 20, text: "[FIRST_NAME] prefers to learn through step-by-step instructions rather than figuring things out on their own.", category: "S" },
+
+  // T/F questions
+  { id: 21, text: "[FIRST_NAME] makes decisions based on logic rather than emotions.", category: "T" },
+  { id: 22, text: "[FIRST_NAME] values objectivity over personal feelings when making decisions.", category: "T" },
+  { id: 23, text: "[FIRST_NAME] prefers to analyze problems logically.", category: "T" },
+  { id: 24, text: "[FIRST_NAME] tends to prioritize fairness over harmony in conflicts.", category: "T" },
+  { id: 25, text: "[FIRST_NAME] is more convinced by rational arguments than emotional appeals.", category: "T" },
+  { id: 26, text: "[FIRST_NAME] considers how decisions will affect others' feelings.", category: "F" },
+  { id: 27, text: "[FIRST_NAME] values harmony and avoiding conflict in relationships.", category: "F" },
+  { id: 28, text: "[FIRST_NAME] often makes decisions based on gut feelings.", category: "F" },
+  { id: 29, text: "[FIRST_NAME] tends to be empathetic and sensitive to others' emotions.", category: "F" },
+  { id: 30, text: "[FIRST_NAME] believes that considering people's feelings is as important as considering facts.", category: "F" },
+
+  // J/P questions
+  { id: 31, text: "[FIRST_NAME] prefers to have a structured and planned approach to life.", category: "J" },
+  { id: 32, text: "[FIRST_NAME] likes to have a detailed plan before starting a project.", category: "J" },
+  { id: 33, text: "[FIRST_NAME] likes to have things settled and decided.", category: "J" },
+  { id: 34, text: "[FIRST_NAME] prefers to finish one project before starting another.", category: "J" },
+  { id: 35, text: "[FIRST_NAME] finds comfort in routines and schedules.", category: "J" },
+  { id: 36, text: "[FIRST_NAME] prefers to keep options open and be flexible.", category: "P" },
+  { id: 37, text: "[FIRST_NAME] prefers to go with the flow rather than stick to a rigid schedule.", category: "P" },
+  { id: 38, text: "[FIRST_NAME] enjoys spontaneity and last-minute plans.", category: "P" },
+  { id: 39, text: "[FIRST_NAME] often starts projects without detailed planning.", category: "P" },
+  { id: 40, text: "[FIRST_NAME] finds too much structure and planning limiting and constraining.", category: "P" }
 ];
+
+const shuffleArray = (array) => {
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
+};
 
 function MbtiTest() {
   const { uniqueId } = useParams();
@@ -49,6 +74,7 @@ function MbtiTest() {
   const [error, setError] = useState(null);
   const [userName, setUserName] = useState('User');
   const [direction, setDirection] = useState(1);
+  const [shuffledQuestions, setShuffledQuestions] = useState([]);
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -74,6 +100,10 @@ function MbtiTest() {
     fetchUserData();
   }, [uniqueId]);
 
+  useEffect(() => {
+    setShuffledQuestions(shuffleArray([...questions]));
+  }, []);
+
   if (error) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gray-100 px-4">
@@ -86,11 +116,11 @@ function MbtiTest() {
   }
 
   const handleAnswer = (value) => {
-    setAnswers({ ...answers, [questions[currentQuestion].id]: value });
+    setAnswers({ ...answers, [shuffledQuestions[currentQuestion].id]: value });
   };
 
   const goToNextQuestion = () => {
-    if (currentQuestion < questions.length - 1) {
+    if (currentQuestion < shuffledQuestions.length - 1) {
       setDirection(1);
       setCurrentQuestion(currentQuestion + 1);
     } else {
@@ -108,7 +138,7 @@ function MbtiTest() {
   const calculateMBTI = () => {
     const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
     
-    questions.forEach(q => {
+    shuffledQuestions.forEach(q => {
       const answer = answers[q.id];
       const category = q.category;
       const oppositeCategory = category === 'E' ? 'I' : category === 'S' ? 'N' : category === 'T' ? 'F' : 'P';
@@ -212,13 +242,13 @@ function MbtiTest() {
         <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-6 md:p-8">
           <h1 className="text-2xl md:text-3xl font-bold text-indigo-600 mb-6 text-center">MBTI Test for {userName}</h1>
           <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
-            <span>Question {currentQuestion + 1} of {questions.length}</span>
-            <span>{Math.round((currentQuestion / questions.length) * 100)}% complete</span>
+            <span>Question {currentQuestion + 1} of {shuffledQuestions.length}</span>
+            <span>{Math.round(((currentQuestion + 1) / shuffledQuestions.length) * 100)}% complete</span>
           </div>
           <div className="mb-4 bg-gray-200 rounded-full h-2.5">
             <div 
               className="bg-indigo-600 h-2.5 rounded-full transition-all duration-300 ease-out" 
-              style={{ width: `${((currentQuestion + 1) / questions.length) * 100}%` }}
+              style={{ width: `${((currentQuestion + 1) / shuffledQuestions.length) * 100}%` }}
             ></div>
           </div>
           <AnimatePresence mode="wait">
@@ -232,7 +262,7 @@ function MbtiTest() {
             >
               <div className="bg-indigo-50 rounded-lg p-6 mb-8">
                 <p className="text-xl font-semibold text-indigo-800 mb-6">
-                  {questions[currentQuestion].text.replace('[FIRST_NAME]', userName)}
+                  {shuffledQuestions[currentQuestion].text.replace('[FIRST_NAME]', userName)}
                 </p>
                 <div className="space-y-3">
                   {[1, 2, 3, 4, 5, 6, 7].map((value) => (
@@ -240,7 +270,7 @@ function MbtiTest() {
                       key={value}
                       onClick={() => {
                         handleAnswer(value);
-                        if (currentQuestion < questions.length - 1) {
+                        if (currentQuestion < shuffledQuestions.length - 1) {
                           setDirection(1);
                           setCurrentQuestion(currentQuestion + 1);
                         } else {
@@ -248,7 +278,7 @@ function MbtiTest() {
                         }
                       }}
                       className={`w-full py-3 px-4 rounded-lg text-lg transition-colors duration-200 flex justify-between items-center ${
-                        answers[questions[currentQuestion].id] === value
+                        answers[shuffledQuestions[currentQuestion].id] === value
                           ? 'bg-indigo-600 text-white'
                           : 'bg-white text-gray-800 hover:bg-indigo-100'
                       }`}
@@ -399,7 +429,7 @@ function MbtiTest() {
     <div className="flex flex-col items-center justify-center min-h-screen p-4">
       <h1 className="text-2xl font-bold mb-6">MBTI Test for {userName}</h1>
       <div className="w-full max-w-md bg-white rounded-lg shadow-md p-6">
-        <p className="mb-4 text-lg">{questions[currentQuestion].text.replace('[FIRST_NAME]', userName)}</p>
+        <p className="mb-4 text-lg">{shuffledQuestions[currentQuestion].text.replace('[FIRST_NAME]', userName)}</p>
         <div className="flex justify-between items-center">
           <span>Strongly Disagree</span>
           <div className="flex space-x-2">
@@ -408,7 +438,7 @@ function MbtiTest() {
                 key={value}
                 onClick={() => handleAnswer(value)}
                 className={`w-8 h-8 rounded-full ${
-                  answers[questions[currentQuestion].id] === value
+                  answers[shuffledQuestions[currentQuestion].id] === value
                     ? 'bg-indigo-600 text-white'
                     : 'bg-gray-200 hover:bg-indigo-200'
                 }`}
@@ -420,7 +450,7 @@ function MbtiTest() {
           <span>Strongly Agree</span>
         </div>
         <div className="mt-4 text-sm text-gray-600">
-          Question {currentQuestion + 1} of {questions.length}
+          Question {currentQuestion + 1} of {shuffledQuestions.length}
         </div>
       </div>
     </div>
