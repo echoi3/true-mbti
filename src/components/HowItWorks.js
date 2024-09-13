@@ -4,17 +4,17 @@ import { motion } from 'framer-motion';
 const steps = [
   {
     title: "Sign Up",
-    description: "You'll see your updated MBTI as your friends submit their assessments of you.",
+    description: "Once you sign up, you'll gain access to a dashboard where your MBTI results are updated in real time.",
     icon: "🔐"
   },
   {
     title: "Generate Link",
-    description: "Create unique test links for your friends or family members to fill out for you.",
+    description: "Create a unique test link for your friends or family members to fill out for you.",
     icon: "🔗"
   },
   {
     title: "Share",
-    description: "Send the link to someone who knows you well to take the test.",
+    description: "Send the link to someone who knows you well to take the test for you.",
     icon: "📤"
   },
   {

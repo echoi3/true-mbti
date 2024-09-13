@@ -254,8 +254,8 @@ function Dashboard() {
           {userData && (
             <div className="px-4 py-3">
               <h2 className="text-xl font-bold mb-2">Welcome, {userData.name.split(' ')[0]}!</h2>
-              <p className="text-sm text-gray-600 mb-2">Email: {userData.email}</p>
-              <p className="text-base font-semibold text-indigo-600 mb-4">
+              <p className="text-sm text-gray-600 mb-4">Email: {userData.email}</p>
+              <p className="text-base font-semibold text-indigo-600 mb-2">
                 {submissionCount === 0 
                   ? "Share your MBTI test link with others so that they can submit the test for you!"
                   : submissionCount === 1 
@@ -265,7 +265,7 @@ function Dashboard() {
             </div>
           )}
           {mbtiResult && mbtiDistribution && (
-            <div ref={mbtiResultRef} className="bg-indigo-50 rounded-lg p-6 mb-6">
+            <div ref={mbtiResultRef} className="bg-indigo-50 rounded-lg p-6 mt-2 mb-6">
               <h3 className="text-xl font-semibold text-indigo-800 mb-4">Your True MBTI:</h3>
               <div className="flex flex-col items-center justify-center mb-6">
                 <div className="w-20 h-20 rounded-full bg-indigo-200 flex items-center justify-center mb-2">
@@ -284,24 +284,26 @@ function Dashboard() {
               {renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP, 'J', 'P')}
             </div>
           )}
-          <div className="bg-indigo-50 rounded-lg p-4 mb-6">
-            <h3 className="text-lg font-medium text-indigo-800 mb-2">Your unique MBTI test URL:</h3>
-            <div className="flex items-center">
-              <input
-                type="text"
-                value={uniqueUrl || 'Generating URL...'}
-                readOnly
-                className="flex-grow bg-white border border-gray-300 rounded-l-md py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
-              />
-              <button
-                onClick={() => navigator.clipboard.writeText(uniqueUrl)}
-                disabled={!uniqueUrl}
-                className="bg-indigo-600 text-white rounded-r-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
-              >
-                Copy
-              </button>
+          {uniqueUrl && (
+            <div className="bg-indigo-50 rounded-lg p-4 mb-6">
+              <h3 className="text-lg font-medium text-indigo-800 mb-2">Your unique MBTI test URL:</h3>
+              <div className="flex items-center">
+                <input
+                  type="text"
+                  value={uniqueUrl || 'Generating URL...'}
+                  readOnly
+                  className="flex-grow bg-white border border-gray-300 rounded-l-md py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
+                />
+                <button
+                  onClick={() => navigator.clipboard.writeText(uniqueUrl)}
+                  disabled={!uniqueUrl}
+                  className="bg-indigo-600 text-white rounded-r-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+                >
+                  Copy
+                </button>
+              </div>
             </div>
-          </div>
+          )}
           <div className="px-4 py-3">
             {/* Hidden shareable component */}
             <div className="hidden">
