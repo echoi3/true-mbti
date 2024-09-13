@@ -22,7 +22,6 @@ function SignUpButton() {
         created_at: new Date().toISOString(),
       }, { merge: true });
 
-      console.log('User data stored successfully');
       navigate('/dashboard');
     } catch (error) {
       if (error.code === 'auth/popup-blocked') {
