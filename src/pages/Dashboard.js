@@ -46,6 +46,11 @@ function Dashboard() {
             if (data.mbtiResults) {
               setSubmissionCount(data.mbtiResults.length);
             }
+
+            if (!data.uniqueUrl) {
+              const newUniqueUrl = await generateUniqueUrl(user.uid);
+              setUniqueUrl(newUniqueUrl);
+            }
           }
         } catch (error) {
           console.error('Error fetching user data:', error);
@@ -70,28 +75,6 @@ function Dashboard() {
       navigate('/');
     } catch (error) {
       console.error('Error signing out:', error);
-    }
-  };
-
-  const handleGenerateUrl = async () => {
-    const user = auth.currentUser;
-    if (user) {
-      try {
-        const newUniqueUrl = await generateUniqueUrl(user.uid);
-        setUniqueUrl(newUniqueUrl);
-        setUrlGenerated(true);
-        setTimeout(() => setUrlGenerated(false), 3000); // Hide notification after 3 seconds
-        
-        const docRef = doc(db, 'users', user.uid);
-        const docSnap = await getDoc(docRef);
-        if (docSnap.exists()) {
-          setUserData(docSnap.data());
-        }
-      } catch (error) {
-        console.error('Error generating unique URL:', error);
-      }
-    } else {
-      console.error('No authenticated user found');
     }
   };
 
@@ -273,9 +256,11 @@ function Dashboard() {
               <h2 className="text-xl font-bold mb-2">Welcome, {userData.name.split(' ')[0]}!</h2>
               <p className="text-sm text-gray-600 mb-2">Email: {userData.email}</p>
               <p className="text-base font-semibold text-indigo-600 mb-4">
-                {submissionCount === 1 
-                  ? "1 amazing individual has submitted a test for you" 
-                  : `${submissionCount} amazing individuals have submitted tests for you`}
+                {submissionCount === 0 
+                  ? "Share your MBTI test link with others so that they can submit the test for you!"
+                  : submissionCount === 1 
+                    ? "1 amazing individual has submitted a test for you" 
+                    : `${submissionCount} amazing individuals have submitted tests for you`}
               </p>
             </div>
           )}
@@ -299,25 +284,24 @@ function Dashboard() {
               {renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP, 'J', 'P')}
             </div>
           )}
-          {uniqueUrl && (
-            <div className="bg-indigo-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-medium text-indigo-800 mb-2">Your unique MBTI test URL:</h3>
-              <div className="flex items-center">
-                <input
-                  type="text"
-                  value={uniqueUrl}
-                  readOnly
-                  className="flex-grow bg-white border border-gray-300 rounded-l-md py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
-                />
-                <button
-                  onClick={() => navigator.clipboard.writeText(uniqueUrl)}
-                  className="bg-indigo-600 text-white rounded-r-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap flex-shrink-0"
-                >
-                  Copy
-                </button>
-              </div>
+          <div className="bg-indigo-50 rounded-lg p-4 mb-6">
+            <h3 className="text-lg font-medium text-indigo-800 mb-2">Your unique MBTI test URL:</h3>
+            <div className="flex items-center">
+              <input
+                type="text"
+                value={uniqueUrl || 'Generating URL...'}
+                readOnly
+                className="flex-grow bg-white border border-gray-300 rounded-l-md py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
+              />
+              <button
+                onClick={() => navigator.clipboard.writeText(uniqueUrl)}
+                disabled={!uniqueUrl}
+                className="bg-indigo-600 text-white rounded-r-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                Copy
+              </button>
             </div>
-          )}
+          </div>
           <div className="px-4 py-3">
             {/* Hidden shareable component */}
             <div className="hidden">
@@ -343,15 +327,6 @@ function Dashboard() {
             >
               Share My Result
             </button>
-
-            {!uniqueUrl && (
-              <button
-                onClick={handleGenerateUrl}
-                className="w-full bg-indigo-600 text-white rounded-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mb-3"
-              >
-                Generate Unique URL
-              </button>
-            )}
 
             <button
               onClick={handleSignOut}
