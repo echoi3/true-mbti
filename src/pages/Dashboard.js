@@ -193,12 +193,23 @@ function Dashboard() {
 
   const handleShareResult = async () => {
     console.log('Share button clicked');
-    if (shareableRef.current && mbtiResult && mbtiDistribution) {
+    if (shareableRef.current && mbtiResult && mbtiDistribution && userData) {
       try {
         console.log('Attempting to generate image');
+        
+        // Add a small delay to ensure content is rendered
+        await new Promise(resolve => setTimeout(resolve, 100));
+        
         const dataUrl = await toPng(shareableRef.current, {
           quality: 0.95,
-          backgroundColor: 'white',
+          backgroundColor: '#F0E6FA',
+          width: 400,
+          height: 700,
+          style: {
+            display: 'flex',
+            justifyContent: 'center',
+            alignItems: 'center',
+          },
         });
         console.log('Image generated successfully');
 
@@ -237,10 +248,11 @@ function Dashboard() {
         console.error('Error generating image:', error);
       }
     } else {
-      console.error('MBTI result or distribution is not available, or shareableRef is null');
+      console.error('MBTI result, distribution, or user data is not available, or shareableRef is null');
       console.log('shareableRef:', shareableRef.current);
       console.log('mbtiResult:', mbtiResult);
       console.log('mbtiDistribution:', mbtiDistribution);
+      console.log('userData:', userData);
     }
   };
 
@@ -269,7 +281,7 @@ function Dashboard() {
           )}
           {mbtiResult && mbtiDistribution && (
             <div ref={mbtiResultRef} className="bg-indigo-50 rounded-lg p-6 mb-6">
-              <h3 className="text-xl font-semibold text-indigo-800 mb-4">Your Average MBTI:</h3>
+              <h3 className="text-xl font-semibold text-indigo-800 mb-4">Your True MBTI:</h3>
               <div className="flex flex-col items-center justify-center mb-6">
                 <div className="w-20 h-20 rounded-full bg-indigo-200 flex items-center justify-center mb-2">
                   <span className="text-3xl">{getMbtiEmoji(mbtiResult)}</span>
@@ -309,13 +321,15 @@ function Dashboard() {
           <div className="px-4 py-3">
             {/* Hidden shareable component */}
             <div className="hidden">
-              <div ref={shareableRef} className="bg-white p-4" style={{ width: '500px', height: 'auto' }}>
-                {mbtiResult && mbtiDistribution && (
+              <div ref={shareableRef} className="flex items-center justify-center" style={{ width: '400px', height: '700px', backgroundColor: '#F0E6FA' }}>
+                {mbtiResult && mbtiDistribution && userData && (
                   <ShareableMBTIResult
                     mbtiResult={mbtiResult}
                     mbtiDistribution={mbtiDistribution}
                     getMbtiEmoji={getMbtiEmoji}
                     getMbtiDescription={getMbtiDescription}
+                    userName={userData.name}
+                    testTakerCount={userData.mbtiResults ? userData.mbtiResults.length : 0}
                   />
                 )}
               </div>
@@ -329,6 +343,15 @@ function Dashboard() {
             >
               Share My Result
             </button>
+
+            {!uniqueUrl && (
+              <button
+                onClick={handleGenerateUrl}
+                className="w-full bg-indigo-600 text-white rounded-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 mb-3"
+              >
+                Generate Unique URL
+              </button>
+            )}
 
             <button
               onClick={handleSignOut}
