@@ -47,3 +47,29 @@ exports.sendEmailNotification = functions.https.onCall(async (data, context) => 
     throw new functions.https.HttpsError('internal', `Failed to send email: ${error.message}`);
   }
 });
+
+exports.sendAdminNotification = functions.auth.user().onCreate(async (user) => {
+  const mailOptions = {
+    from: functions.config().gmail.email,
+    to: 'ericchoi325@gmail.com',
+    subject: 'New User Signup on TrueMBTI',
+    html: `
+      <h1>New User Signup</h1>
+      <p>A new user has signed up for TrueMBTI:</p>
+      <ul>
+        <li>Email: ${user.email}</li>
+        <li>User ID: ${user.uid}</li>
+        <li>Signup Time: ${user.metadata.creationTime}</li>
+      </ul>
+    `,
+  };
+
+  try {
+    const result = await transporter.sendMail(mailOptions);
+    console.log('Admin notification email sent successfully:', result);
+    return { success: true };
+  } catch (error) {
+    console.error('Error sending admin notification email:', error);
+    return { success: false, error: error.message };
+  }
+});
