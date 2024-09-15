@@ -192,11 +192,27 @@ function MbtiTest() {
 
     try {
       await updateUserMBTI(result, distribution);
+      await sendEmailNotification(userId, userName);
     } catch (error) {
-      console.error('Error updating user MBTI:', error);
+      console.error('Error updating user MBTI or sending email:', error);
       setError('An error occurred while saving your results. Please try again.');
-      // Attempt to retry the update
-      setTimeout(() => retryUpdateUserMBTI(result, distribution), 5000);
+      // Attempt to retry the update and email sending
+      setTimeout(() => retryUpdateAndNotify(result, distribution), 5000);
+    }
+  };
+
+  const retryUpdateAndNotify = async (result, distribution) => {
+    try {
+      const success = await updateUserMBTI(result, distribution);
+      if (success) {
+        await sendEmailNotification(userId, userName);
+        setError(null);
+      } else {
+        throw new Error('Failed to update user MBTI');
+      }
+    } catch (error) {
+      console.error('Error in retry:', error);
+      setError('Unable to save results or send notification. Please try again later.');
     }
   };
 
@@ -241,7 +257,6 @@ function MbtiTest() {
             averageDistribution: newAverageDistribution
           });
 
-          await sendEmailNotification(userId, userName);
           return true;
         } catch (error) {
           console.error('Error updating user document:', error);
@@ -256,30 +271,16 @@ function MbtiTest() {
     return false;
   };
 
-  const retryUpdateUserMBTI = async (result, distribution) => {
-    try {
-      const success = await updateUserMBTI(result, distribution);
-      if (success) {
-        setError(null);
-      } else {
-        setError('Unable to save results. Please try again later.');
-      }
-    } catch (error) {
-      console.error('Error in retry:', error);
-      setError('Unable to save results. Please try again later.');
-    }
-  };
-
   const sendEmailNotification = async (userId, testTakerName) => {
     try {
       const functions = getFunctions();
       const sendEmail = httpsCallable(functions, 'sendEmailNotification');
       const result = await sendEmail({ userId, testTakerName });
       console.log('Email notification sent successfully', result.data);
+      return true;
     } catch (error) {
       console.error('Error sending email notification:', error);
-      // Don't throw an error here, as we don't want to block the test completion
-      // if email notification fails
+      throw error;
     }
   };
 
