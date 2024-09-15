@@ -195,6 +195,8 @@ function MbtiTest() {
     } catch (error) {
       console.error('Error updating user MBTI:', error);
       setError('An error occurred while saving your results. Please try again.');
+      // Attempt to retry the update
+      setTimeout(() => retryUpdateUserMBTI(result, distribution), 5000);
     }
   };
 
@@ -240,16 +242,31 @@ function MbtiTest() {
           });
 
           await sendEmailNotification(userId, userName);
-          break;
+          return true;
         } catch (error) {
           console.error('Error updating user document:', error);
           retries--;
           if (retries === 0) {
             throw error;
           }
-          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
+          await new Promise(resolve => setTimeout(resolve, 1000));
         }
       }
+    }
+    return false;
+  };
+
+  const retryUpdateUserMBTI = async (result, distribution) => {
+    try {
+      const success = await updateUserMBTI(result, distribution);
+      if (success) {
+        setError(null);
+      } else {
+        setError('Unable to save results. Please try again later.');
+      }
+    } catch (error) {
+      console.error('Error in retry:', error);
+      setError('Unable to save results. Please try again later.');
     }
   };
 
@@ -261,6 +278,8 @@ function MbtiTest() {
       console.log('Email notification sent successfully', result.data);
     } catch (error) {
       console.error('Error sending email notification:', error);
+      // Don't throw an error here, as we don't want to block the test completion
+      // if email notification fails
     }
   };
 
