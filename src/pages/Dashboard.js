@@ -184,16 +184,12 @@ function Dashboard() {
         // Add a small delay to ensure content is rendered
         await new Promise(resolve => setTimeout(resolve, 100));
         
+        const scale = 1.1; // Increase the scale for better quality on high-DPI screens
         const dataUrl = await toPng(shareableRef.current, {
-          quality: 0.95,
-          backgroundColor: '#F0E6FA',
-          width: 400,
-          height: 700,
-          style: {
-            display: 'flex',
-            justifyContent: 'center',
-            alignItems: 'center',
-          },
+          quality: 10,
+          pixelRatio: scale,
+          width: 400 * scale,
+          height: 700 * scale,
         });
         console.log('Image generated successfully');
 

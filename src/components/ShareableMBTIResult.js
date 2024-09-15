@@ -39,23 +39,23 @@ function ShareableMBTIResult({ mbtiResult, mbtiDistribution, getMbtiEmoji, getMb
   const firstName = userName.split(' ')[0];
 
   return (
-    <div className="flex items-center justify-center" style={{ width: '400px', height: '600px', backgroundColor: '#F0E6FA' }}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{ width: '360px', height: '580px' }}>
-        <div className="bg-indigo-600 px-4 py-2">
-          <h1 className="text-lg font-bold text-white text-center">{firstName}'s True MBTI</h1>
+    <div className="flex items-center justify-center" style={{ width: '400px', height: '700px', backgroundColor: '#F0E6FA' }}>
+      <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{ width: '360px', height: '660px' }}>
+        <div className="bg-indigo-600 px-4 py-3">
+          <h1 className="text-xl font-bold text-white text-center">{firstName}'s True MBTI</h1>
         </div>
-        <div className="p-3 flex flex-col justify-between" style={{ height: 'calc(580px - 2.5rem)' }}>
+        <div className="p-4 flex flex-col justify-between" style={{ height: 'calc(660px - 3rem)' }}>
           <div>
-            <div className="flex flex-col items-center justify-center mb-3">
-              <div className="w-16 h-16 rounded-full bg-indigo-200 flex items-center justify-center mb-1">
-                <span className="text-2xl">{getMbtiEmoji(mbtiResult)}</span>
+            <div className="flex flex-col items-center justify-center mb-4">
+              <div className="w-20 h-20 rounded-full bg-indigo-200 flex items-center justify-center mb-2">
+                <span className="text-3xl">{getMbtiEmoji(mbtiResult)}</span>
               </div>
-              <div className="text-2xl font-bold text-indigo-800 mt-1">{mbtiResult}</div>
+              <div className="text-3xl font-bold text-indigo-800 mt-1">{mbtiResult}</div>
               <p className="text-xs text-gray-600 mt-1 text-center">
                 According to {testTakerCount} {testTakerCount === 1 ? 'individual' : 'individuals'} who took the MBTI test on behalf of {firstName}
               </p>
             </div>
-            <p className="text-center text-indigo-600 mb-3 text-xs font-bold">
+            <p className="text-center text-indigo-600 mb-4 text-sm font-bold">
               {getMbtiDescription(mbtiResult)}
             </p>
             {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI, 'E', 'I')}
