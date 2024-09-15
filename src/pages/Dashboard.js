@@ -184,7 +184,7 @@ function Dashboard() {
         // Add a small delay to ensure content is rendered
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const scale = 1.1; // Increase the scale for better quality on high-DPI screens
+        const scale = 1.05; // Increase the scale for better quality on high-DPI screens
         const dataUrl = await toPng(shareableRef.current, {
           quality: 10,
           pixelRatio: scale,
@@ -324,7 +324,7 @@ function Dashboard() {
           <div className="px-4 py-3">
             {/* Hidden shareable component */}
             <div className="hidden">
-              <div ref={shareableRef} className="flex items-center justify-center" style={{ width: '400px', height: '700px', backgroundColor: '#F0E6FA' }}>
+              <div ref={shareableRef} className="flex items-center justify-center bg-indigo-100" style={{ width: '400px', height: '700px', backgroundColor: '#F0E6FA' }}>
                 {mbtiResult && mbtiDistribution && userData && (
                   <ShareableMBTIResult
                     mbtiResult={mbtiResult}

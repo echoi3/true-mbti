@@ -39,8 +39,8 @@ function ShareableMBTIResult({ mbtiResult, mbtiDistribution, getMbtiEmoji, getMb
   const firstName = userName.split(' ')[0];
 
   return (
-    <div className="flex items-center justify-center" style={{ width: '400px', height: '700px', backgroundColor: '#F0E6FA' }}>
-      <div className="bg-white rounded-lg overflow-hidden shadow-lg" style={{ width: '360px', height: '680px' }}>
+    <div className="flex items-center justify-center" style={{ width: '400px', height: '700px' }}>
+      <div className="bg-white rounded-lg overflow-hidden" style={{ width: '360px', height: '680px' }}>
         <div className="bg-indigo-600 px-4 py-3">
           <h1 className="text-xl font-bold text-white text-center">{firstName}'s True MBTI</h1>
         </div>
