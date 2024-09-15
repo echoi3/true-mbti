@@ -152,36 +152,40 @@ function MbtiTest() {
       const oppositeCategory = category === 'E' ? 'I' : category === 'S' ? 'N' : category === 'T' ? 'F' : 'P';
       
       if (answer === 7) {
-        scores[category] += 2;
+        scores[category] += 3;
       } else if (answer === 6) {
+        scores[category] += 2;
+      } else if (answer === 5) {
         scores[category] += 1;
       } else if (answer === 3) {
         scores[oppositeCategory] += 1;
-      } else if (answer === 2 || answer === 1) {
+      } else if (answer === 2) {
         scores[oppositeCategory] += 2;
+      } else if (answer === 1) {
+        scores[oppositeCategory] += 3;
       }
       // Note: answer === 4 (neutral) doesn't contribute to either category
     });
 
     const calculatePreference = (a, b) => {
+      console.log(scores)
       const totalPoints = scores[a] + scores[b];
-      const difference = Math.abs(scores[a] - scores[b]);
-      const preference = scores[a] > scores[b] ? a : b;
-      const strength = Math.round((difference / totalPoints) * 100);
-      return { preference, strength };
+      const aPercentage = Math.round((scores[a] / totalPoints) * 100);
+      const preference = aPercentage >= 50 ? a : b;
+      return { preference, aPercentage };
     };
-
+    
     const ei = calculatePreference('E', 'I');
-    const sn = calculatePreference('S', 'N');
+    const sn = calculatePreference('N', 'S');
     const tf = calculatePreference('T', 'F');
     const jp = calculatePreference('J', 'P');
-
+    
     const result = ei.preference + sn.preference + tf.preference + jp.preference;
     const distribution = {
-      EI: ei.strength,
-      NS: sn.strength,
-      TF: tf.strength,
-      JP: jp.strength
+      EI: ei.aPercentage,
+      NS: sn.aPercentage,
+      TF: tf.aPercentage,
+      JP: jp.aPercentage
     };
 
     setMbtiResult(result);
