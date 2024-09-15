@@ -115,12 +115,12 @@ function MbtiTest() {
     );
   }
 
-  const handleAnswer = (value) => {
+  const handleAnswer = async (value) => {
     const newAnswers = { ...answers, [shuffledQuestions[currentQuestion].id]: value };
     setAnswers(newAnswers);
 
     if (currentQuestion === shuffledQuestions.length - 1) {
-      calculateMBTI(newAnswers);
+      await calculateMBTI(newAnswers);
     } else {
       setDirection(1);
       setCurrentQuestion(currentQuestion + 1);
@@ -143,7 +143,7 @@ function MbtiTest() {
     }
   };
 
-  const calculateMBTI = (finalAnswers) => {
+  const calculateMBTI = async (finalAnswers) => {
     const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
     
     shuffledQuestions.forEach(q => {
@@ -164,11 +164,9 @@ function MbtiTest() {
       } else if (answer === 1) {
         scores[oppositeCategory] += 3;
       }
-      // Note: answer === 4 (neutral) doesn't contribute to either category
     });
 
     const calculatePreference = (a, b) => {
-      console.log(scores)
       const totalPoints = scores[a] + scores[b];
       const aPercentage = Math.round((scores[a] / totalPoints) * 100);
       const preference = aPercentage >= 50 ? a : b;
@@ -192,8 +190,12 @@ function MbtiTest() {
     setMbtiDistribution(distribution);
     setTestCompleted(true);
 
-    // Update user's MBTI results in the database
-    updateUserMBTI(result, distribution);
+    try {
+      await updateUserMBTI(result, distribution);
+    } catch (error) {
+      console.error('Error updating user MBTI:', error);
+      setError('An error occurred while saving your results. Please try again.');
+    }
   };
 
   const updateUserMBTI = async (result, distribution) => {
@@ -206,34 +208,48 @@ function MbtiTest() {
       };
 
       const userRef = doc(db, 'users', userId);
-      const userDoc = await getDoc(userRef);
-      const userData = userDoc.data();
       
-      let newAverageMBTI = result;
-      let newAverageDistribution = distribution;
+      let retries = 3;
+      while (retries > 0) {
+        try {
+          const userDoc = await getDoc(userRef);
+          const userData = userDoc.data();
+          
+          let newAverageMBTI = result;
+          let newAverageDistribution = distribution;
 
-      if (userData.averageMBTI) {
-        const totalTests = (userData.mbtiResults?.length || 0) + 1;
-        newAverageDistribution = {
-          EI: (userData.averageDistribution.EI * (totalTests - 1) + distribution.EI) / totalTests,
-          NS: (userData.averageDistribution.NS * (totalTests - 1) + distribution.NS) / totalTests,
-          TF: (userData.averageDistribution.TF * (totalTests - 1) + distribution.TF) / totalTests,
-          JP: (userData.averageDistribution.JP * (totalTests - 1) + distribution.JP) / totalTests
-        };
-        newAverageMBTI = 
-          (newAverageDistribution.EI > 50 ? 'E' : 'I') +
-          (newAverageDistribution.NS > 50 ? 'N' : 'S') +
-          (newAverageDistribution.TF > 50 ? 'T' : 'F') +
-          (newAverageDistribution.JP > 50 ? 'J' : 'P');
+          if (userData.averageMBTI) {
+            const totalTests = (userData.mbtiResults?.length || 0) + 1;
+            newAverageDistribution = {
+              EI: (userData.averageDistribution.EI * (totalTests - 1) + distribution.EI) / totalTests,
+              NS: (userData.averageDistribution.NS * (totalTests - 1) + distribution.NS) / totalTests,
+              TF: (userData.averageDistribution.TF * (totalTests - 1) + distribution.TF) / totalTests,
+              JP: (userData.averageDistribution.JP * (totalTests - 1) + distribution.JP) / totalTests
+            };
+            newAverageMBTI = 
+              (newAverageDistribution.EI > 50 ? 'E' : 'I') +
+              (newAverageDistribution.NS > 50 ? 'N' : 'S') +
+              (newAverageDistribution.TF > 50 ? 'T' : 'F') +
+              (newAverageDistribution.JP > 50 ? 'J' : 'P');
+          }
+
+          await updateDoc(userRef, {
+            mbtiResults: arrayUnion(testResult),
+            averageMBTI: newAverageMBTI,
+            averageDistribution: newAverageDistribution
+          });
+
+          await sendEmailNotification(userId, userName);
+          break;
+        } catch (error) {
+          console.error('Error updating user document:', error);
+          retries--;
+          if (retries === 0) {
+            throw error;
+          }
+          await new Promise(resolve => setTimeout(resolve, 1000)); // Wait for 1 second before retrying
+        }
       }
-
-      await updateDoc(userRef, {
-        mbtiResults: arrayUnion(testResult),
-        averageMBTI: newAverageMBTI,
-        averageDistribution: newAverageDistribution
-      });
-
-      await sendEmailNotification(userId, userName);
     }
   };
 
