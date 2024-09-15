@@ -183,8 +183,12 @@ function MbtiTest() {
     setTestCompleted(true);
 
     try {
-      await updateUserMBTI(result, distribution);
+      const updateSuccess = await updateUserMBTI(result, distribution);
+      if (!updateSuccess) {
+        throw new Error('Failed to update user MBTI');
+      }
       await sendEmailNotification(userId, userName);
+      console.log('MBTI calculation and update completed successfully');
     } catch (error) {
       console.error('Error in MBTI calculation:', error);
       setError('An error occurred while saving your results. Please try again later.');
@@ -213,16 +217,16 @@ function MbtiTest() {
       const userData = userDoc.data();
       
       let newAverageMBTI = result;
-      let newAverageDistribution = distribution;
+      let newAverageDistribution = { ...distribution };
 
-      if (userData.averageMBTI) {
-        const totalTests = (userData.mbtiResults?.length || 0) + 1;
-        newAverageDistribution = {
-          EI: (userData.averageDistribution.EI * (totalTests - 1) + distribution.EI) / totalTests,
-          NS: (userData.averageDistribution.NS * (totalTests - 1) + distribution.NS) / totalTests,
-          TF: (userData.averageDistribution.TF * (totalTests - 1) + distribution.TF) / totalTests,
-          JP: (userData.averageDistribution.JP * (totalTests - 1) + distribution.JP) / totalTests
-        };
+      if (userData.mbtiResults && userData.mbtiResults.length > 0) {
+        const totalTests = userData.mbtiResults.length + 1;
+        const oldAverage = userData.averageDistribution || distribution;
+        
+        for (let key in newAverageDistribution) {
+          newAverageDistribution[key] = (oldAverage[key] * (totalTests - 1) + distribution[key]) / totalTests;
+        }
+
         newAverageMBTI = 
           (newAverageDistribution.EI > 50 ? 'E' : 'I') +
           (newAverageDistribution.NS > 50 ? 'N' : 'S') +
@@ -230,12 +234,14 @@ function MbtiTest() {
           (newAverageDistribution.JP > 50 ? 'J' : 'P');
       }
 
-      await updateDoc(userRef, {
+      const updateData = {
         mbtiResults: arrayUnion(testResult),
         averageMBTI: newAverageMBTI,
         averageDistribution: newAverageDistribution
-      });
+      };
 
+      await updateDoc(userRef, updateData);
+      console.log('User MBTI updated successfully:', updateData);
       return true;
     } catch (error) {
       console.error('Error updating user document:', error);
