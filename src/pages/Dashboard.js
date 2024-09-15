@@ -18,6 +18,7 @@ function Dashboard() {
   const [mbtiDistribution, setMbtiDistribution] = useState(null);
   const [submissionCount, setSubmissionCount] = useState(0);
   const [urlGenerated, setUrlGenerated] = useState(false);
+  const [copySuccess, setCopySuccess] = useState(false);
   const mbtiResultRef = useRef(null);
   const shareableRef = useRef(null);
 
@@ -239,6 +240,18 @@ function Dashboard() {
     }
   };
 
+  const handleCopyUrl = async () => {
+    if (uniqueUrl) {
+      try {
+        await navigator.clipboard.writeText(uniqueUrl);
+        setCopySuccess(true);
+        setTimeout(() => setCopySuccess(false), 3000); // Hide message after 3 seconds
+      } catch (err) {
+        console.error('Failed to copy text: ', err);
+      }
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-b from-indigo-100 to-purple-100 py-6 px-4 sm:px-6 lg:px-8">
       <div className="max-w-md mx-auto">
@@ -287,7 +300,7 @@ function Dashboard() {
           {uniqueUrl && (
             <div className="bg-indigo-50 rounded-lg p-4 mb-6">
               <h3 className="text-lg font-medium text-indigo-800 mb-2">Your unique MBTI test URL:</h3>
-              <div className="flex items-center">
+              <div className="flex items-center mb-2">
                 <input
                   type="text"
                   value={uniqueUrl || 'Generating URL...'}
@@ -295,13 +308,21 @@ function Dashboard() {
                   className="flex-grow bg-white border border-gray-300 rounded-l-md py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
                 />
                 <button
-                  onClick={() => navigator.clipboard.writeText(uniqueUrl)}
+                  onClick={handleCopyUrl}
                   disabled={!uniqueUrl}
                   className="bg-indigo-600 text-white rounded-r-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   Copy
                 </button>
               </div>
+              {copySuccess && (
+                <div className="mt-2 p-2 bg-green-100 border border-green-400 text-green-700 rounded-md flex items-center">
+                  <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
+                  </svg>
+                  <span className="font-medium">URL copied successfully!</span>
+                </div>
+              )}
             </div>
           )}
           <div className="px-4 py-3">
