@@ -1,58 +1,59 @@
 import React, { useState, useEffect } from 'react';
 import { useParams } from 'react-router-dom';
-import { collection, query, where, getDocs, limit, doc, updateDoc, arrayUnion, getDoc } from 'firebase/firestore';
+import { collection, query, where, getDocs, limit, doc, updateDoc, arrayUnion, getDoc, addDoc } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { motion, AnimatePresence } from 'framer-motion';
 import { httpsCallable, getFunctions } from 'firebase/functions';
+import LogDisplay from './LogDisplay';
 
 const questions = [
   // E/I questions
-  { id: 1, text: "[FIRST_NAME] prefers to spend time in large groups rather than one-on-one.", category: "E" },
-  { id: 2, text: "[FIRST_NAME] enjoys being the center of attention.", category: "E" },
-  { id: 3, text: "[FIRST_NAME] initiates conversations with strangers easily.", category: "E" },
-  { id: 4, text: "[FIRST_NAME] prefers to work in teams rather than independently.", category: "E" },
-  { id: 5, text: "[FIRST_NAME] feels energized after social interactions.", category: "E" },
-  { id: 6, text: "[FIRST_NAME] prefers to recharge by spending time alone.", category: "I" },
-  { id: 7, text: "[FIRST_NAME] is usually quiet and reserved in social situations.", category: "I" },
-  { id: 8, text: "[FIRST_NAME] finds it draining to be in social situations for extended periods.", category: "I" },
-  { id: 9, text: "[FIRST_NAME] prefers written communication over verbal.", category: "I" },
-  { id: 10, text: "[FIRST_NAME] needs quiet time to concentrate and do their best work.", category: "I" },
+  { id: 1, text: "When attending a party, [FIRST_NAME] typically spends more time talking to new people than chatting with close friends.", category: "E" },
+  { id: 2, text: "In group discussions, [FIRST_NAME] is often one of the first to speak up and share ideas.", category: "E" },
+  { id: 3, text: "When traveling, [FIRST_NAME] prefers to strike up conversations with strangers rather than keep to themselves.", category: "E" },
+  { id: 4, text: "[FIRST_NAME] feels more productive when working in a bustling office environment compared to a quiet, private space.", category: "E" },
+  { id: 5, text: "After a long day of social interactions, [FIRST_NAME] feels energized rather than drained.", category: "E" },
+  { id: 6, text: "[FIRST_NAME] prefers to spend weekends engaged in solitary activities rather than attending social events.", category: "I" },
+  { id: 7, text: "In meetings, [FIRST_NAME] tends to listen and observe more than actively participate in discussions.", category: "I" },
+  { id: 8, text: "[FIRST_NAME] finds it more comfortable to express thoughts and feelings through writing rather than verbal communication.", category: "I" },
+  { id: 9, text: "When faced with a problem, [FIRST_NAME] prefers to think it through alone before discussing it with others.", category: "I" },
+  { id: 10, text: "[FIRST_NAME] feels more recharged after spending an evening alone rather than at a social gathering.", category: "I" },
 
   // N/S questions
-  { id: 11, text: "[FIRST_NAME] often thinks about abstract concepts and theories.", category: "N" },
-  { id: 12, text: "[FIRST_NAME] is more interested in future possibilities than present realities.", category: "N" },
-  { id: 13, text: "[FIRST_NAME] enjoys exploring new ideas and possibilities.", category: "N" },
-  { id: 14, text: "[FIRST_NAME] enjoys engaging in deep, meaningful conversations.", category: "N" },
-  { id: 15, text: "[FIRST_NAME] often sees connections between seemingly unrelated things.", category: "N" },
-  { id: 16, text: "[FIRST_NAME] focuses more on details and facts than on big picture concepts.", category: "S" },
-  { id: 17, text: "[FIRST_NAME] prefers practical, hands-on experiences over theoretical discussions.", category: "S" },
-  { id: 18, text: "[FIRST_NAME] prefers to focus on concrete facts and details.", category: "S" },
-  { id: 19, text: "[FIRST_NAME] is often described as a practical and down-to-earth person.", category: "S" },
-  { id: 20, text: "[FIRST_NAME] prefers to learn through step-by-step instructions rather than figuring things out on their own.", category: "S" },
+  { id: 11, text: "[FIRST_NAME] often comes up with creative solutions that others might consider unconventional or 'out of the box'.", category: "N" },
+  { id: 12, text: "When planning for the future, [FIRST_NAME] focuses more on potential opportunities than on practical realities.", category: "N" },
+  { id: 13, text: "[FIRST_NAME] enjoys discussing abstract concepts and theories more than talking about concrete facts and experiences.", category: "N" },
+  { id: 14, text: "When reading a story, [FIRST_NAME] is more likely to:\na) Imagine various possible plot twists and character developments beyond what's written.\nb) Focus on the details and events explicitly described in the text.", category: "N" },
+  { id: 15, text: "[FIRST_NAME] is more interested in exploring new, innovative ideas than perfecting existing methods.", category: "N" },
+  { id: 16, text: "When explaining a concept, [FIRST_NAME] prefers to use specific examples and facts rather than metaphors or analogies.", category: "S" },
+  { id: 17, text: "[FIRST_NAME] tends to trust information from personal experience more than theoretical possibilities.", category: "S" },
+  { id: 18, text: "When working on a project, [FIRST_NAME] focuses more on the immediate, practical steps than the overall concept or vision.", category: "S" },
+  { id: 19, text: "[FIRST_NAME] prefers jobs and hobbies that produce tangible results over those that involve abstract thinking.", category: "S" },
+  { id: 20, text: "When learning a new skill, [FIRST_NAME] prefers hands-on practice to reading about theories and concepts.", category: "S" },
 
   // T/F questions
-  { id: 21, text: "[FIRST_NAME] makes decisions based on logic rather than emotions.", category: "T" },
-  { id: 22, text: "[FIRST_NAME] values objectivity over personal feelings when making decisions.", category: "T" },
-  { id: 23, text: "[FIRST_NAME] prefers to analyze problems logically.", category: "T" },
-  { id: 24, text: "[FIRST_NAME] tends to prioritize fairness over harmony in conflicts.", category: "T" },
-  { id: 25, text: "[FIRST_NAME] is more convinced by rational arguments than emotional appeals.", category: "T" },
-  { id: 26, text: "[FIRST_NAME] considers how decisions will affect others' feelings.", category: "F" },
-  { id: 27, text: "[FIRST_NAME] values harmony and avoiding conflict in relationships.", category: "F" },
-  { id: 28, text: "[FIRST_NAME] often makes decisions based on gut feelings.", category: "F" },
-  { id: 29, text: "[FIRST_NAME] tends to be empathetic and sensitive to others' emotions.", category: "F" },
-  { id: 30, text: "[FIRST_NAME] believes that considering people's feelings is as important as considering facts.", category: "F" },
+  { id: 21, text: "When making important decisions, [FIRST_NAME] prioritizes logical analysis over personal feelings or values.", category: "T" },
+  { id: 22, text: "In a debate, [FIRST_NAME] is more concerned with finding the objective truth than maintaining harmony in the group.", category: "T" },
+  { id: 23, text: "[FIRST_NAME] tends to give more weight to statistical data than personal testimonials when forming opinions.", category: "T" },
+  { id: 24, text: "When giving feedback, [FIRST_NAME] focuses more on pointing out logical inconsistencies than on how the person might feel.", category: "T" },
+  { id: 25, text: "[FIRST_NAME] believes that the most fair way to make decisions is to remove all personal biases and emotions.", category: "T" },
+  { id: 26, text: "When a friend is upset, [FIRST_NAME]'s first instinct is to offer emotional support rather than solutions to the problem.", category: "F" },
+  { id: 27, text: "[FIRST_NAME] often makes decisions based on what feels right, even if it contradicts logical analysis.", category: "F" },
+  { id: 28, text: "In conflicts, [FIRST_NAME] is more concerned about maintaining good relationships than determining who is objectively right.", category: "F" },
+  { id: 29, text: "[FIRST_NAME] is often described by others as empathetic and in tune with people's emotions.", category: "F" },
+  { id: 30, text: "When evaluating a situation, [FIRST_NAME] considers how it will affect people's feelings as much as the practical outcomes.", category: "F" },
 
   // J/P questions
-  { id: 31, text: "[FIRST_NAME] prefers to have a structured and planned approach to life.", category: "J" },
-  { id: 32, text: "[FIRST_NAME] likes to have a detailed plan before starting a project.", category: "J" },
-  { id: 33, text: "[FIRST_NAME] likes to have things settled and decided.", category: "J" },
-  { id: 34, text: "[FIRST_NAME] prefers to finish one project before starting another.", category: "J" },
-  { id: 35, text: "[FIRST_NAME] finds comfort in routines and schedules.", category: "J" },
-  { id: 36, text: "[FIRST_NAME] prefers to keep options open and be flexible.", category: "P" },
-  { id: 37, text: "[FIRST_NAME] prefers to go with the flow rather than stick to a rigid schedule.", category: "P" },
-  { id: 38, text: "[FIRST_NAME] enjoys spontaneity and last-minute plans.", category: "P" },
-  { id: 39, text: "[FIRST_NAME] often starts projects without detailed planning.", category: "P" },
-  { id: 40, text: "[FIRST_NAME] finds too much structure and planning limiting and constraining.", category: "P" }
+  { id: 31, text: "[FIRST_NAME] prefers to have a detailed plan before starting a project, rather than figuring things out along the way.", category: "J" },
+  { id: 32, text: "[FIRST_NAME] feels stressed when deadlines are not clearly defined or when schedules are too flexible.", category: "J" },
+  { id: 33, text: "When packing for a trip, [FIRST_NAME] prepares well in advance and follows a checklist.", category: "J" },
+  { id: 34, text: "[FIRST_NAME] prefers to have a structured daily routine rather than deciding what to do spontaneously.", category: "J" },
+  { id: 35, text: "In group projects, [FIRST_NAME] often takes on the role of organizer, creating timelines and assigning tasks.", category: "J" },
+  { id: 36, text: "[FIRST_NAME] enjoys leaving room in their schedule for unexpected opportunities or last-minute plans.", category: "P" },
+  { id: 37, text: "When working on a project, [FIRST_NAME] prefers to keep options open and make changes as new information comes in.", category: "P" },
+  { id: 38, text: "[FIRST_NAME] finds strict deadlines and detailed schedules to be more constraining than helpful.", category: "P" },
+  { id: 39, text: "When faced with a decision, [FIRST_NAME] prefers to keep exploring options rather than settling on a choice quickly.", category: "P" },
+  { id: 40, text: "[FIRST_NAME] is comfortable starting a project without knowing exactly how it will turn out.", category: "P" }
 ];
 
 const shuffleArray = (array) => {
@@ -75,6 +76,13 @@ function MbtiTest() {
   const [userName, setUserName] = useState('User');
   const [direction, setDirection] = useState(1);
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
+  const [logs, setLogs] = useState([]);
+
+  const customLog = (message) => {
+    const timestamp = new Date().toISOString();
+    setLogs(prevLogs => [...prevLogs, { timestamp, message }]);
+    console.log(message); // Still log to console for development
+  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -89,11 +97,11 @@ function MbtiTest() {
           setUserId(userDoc.id);
           setUserName(userData.name ? userData.name.split(' ')[0] : 'User');
         } else {
-          console.error('No user found with uniqueId:', uniqueId);
+          customLog('No user found with uniqueId:', uniqueId);
           setError('Invalid or expired test link. Please request a new link.');
         }
       } catch (error) {
-        console.error('Error fetching user:', error);
+        customLog('Error fetching user:', error);
         setError('An error occurred while loading the test. Please try again later.');
       }
     };
@@ -184,67 +192,83 @@ function MbtiTest() {
 
     try {
       const updateSuccess = await updateUserMBTI(result, distribution);
-      if (!updateSuccess) {
-        throw new Error('Failed to update user MBTI');
+      if (updateSuccess) {
+        customLog('MBTI calculation and result saving completed successfully');
+      } else {
+        customLog('MBTI calculation completed, but there was an issue saving the result');
       }
       await sendEmailNotification(userId, userName);
-      console.log('MBTI calculation and update completed successfully');
     } catch (error) {
-      console.error('Error in MBTI calculation:', error);
-      setError('An error occurred while saving your results. Please try again later.');
+      customLog(`Error in MBTI calculation: ${error.message}`);
+      setError('An error occurred while processing your results. Please try again later or contact support.');
     }
   };
 
   const updateUserMBTI = async (result, distribution) => {
-    if (!userId) return false;
+    if (!userId) {
+      customLog('No userId available');
+      return false;
+    }
 
     const testResult = {
       result: result,
       distribution: distribution,
       takenAt: new Date().toISOString(),
-      takenBy: uniqueId
+      takenBy: uniqueId,
+      userId: userId
     };
 
-    const userRef = doc(db, 'users', userId);
+    const mbtiResultsRef = collection(db, 'mbtiResults');
     
     try {
-      const userDoc = await getDoc(userRef);
-      if (!userDoc.exists()) {
-        console.error('User document not found');
-        return false;
-      }
+      // Add the result to the mbtiResults collection
+      await addDoc(mbtiResultsRef, testResult);
+      customLog('MBTI result saved successfully');
 
-      const userData = userDoc.data();
-      
-      let newAverageMBTI = result;
-      let newAverageDistribution = { ...distribution };
+      // Try to update the user document
+      try {
+        const userRef = doc(db, 'users', userId);
+        const userDoc = await getDoc(userRef);
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          let newAverageMBTI = result;
+          let newAverageDistribution = { ...distribution };
 
-      if (userData.mbtiResults && userData.mbtiResults.length > 0) {
-        const totalTests = userData.mbtiResults.length + 1;
-        const oldAverage = userData.averageDistribution || distribution;
-        
-        for (let key in newAverageDistribution) {
-          newAverageDistribution[key] = (oldAverage[key] * (totalTests - 1) + distribution[key]) / totalTests;
+          if (userData.mbtiResults && userData.mbtiResults.length > 0) {
+            const totalTests = userData.mbtiResults.length + 1;
+            const oldAverage = userData.averageDistribution || distribution;
+            
+            for (let key in newAverageDistribution) {
+              newAverageDistribution[key] = (oldAverage[key] * (totalTests - 1) + distribution[key]) / totalTests;
+            }
+
+            newAverageMBTI = 
+              (newAverageDistribution.EI > 50 ? 'E' : 'I') +
+              (newAverageDistribution.NS > 50 ? 'N' : 'S') +
+              (newAverageDistribution.TF > 50 ? 'T' : 'F') +
+              (newAverageDistribution.JP > 50 ? 'J' : 'P');
+          }
+
+          const updateData = {
+            mbtiResults: arrayUnion(testResult),
+            averageMBTI: newAverageMBTI,
+            averageDistribution: newAverageDistribution
+          };
+
+          await updateDoc(userRef, updateData);
+          customLog('User MBTI updated successfully');
+        } else {
+          customLog('User document not found, but MBTI result was saved');
         }
-
-        newAverageMBTI = 
-          (newAverageDistribution.EI > 50 ? 'E' : 'I') +
-          (newAverageDistribution.NS > 50 ? 'N' : 'S') +
-          (newAverageDistribution.TF > 50 ? 'T' : 'F') +
-          (newAverageDistribution.JP > 50 ? 'J' : 'P');
+      } catch (userUpdateError) {
+        customLog(`Error updating user document: ${userUpdateError.message}`);
+        customLog('MBTI result was saved, but user document could not be updated');
       }
 
-      const updateData = {
-        mbtiResults: arrayUnion(testResult),
-        averageMBTI: newAverageMBTI,
-        averageDistribution: newAverageDistribution
-      };
-
-      await updateDoc(userRef, updateData);
-      console.log('User MBTI updated successfully:', updateData);
+      // Return true even if user document update fails
       return true;
     } catch (error) {
-      console.error('Error updating user document:', error);
+      customLog(`Error saving MBTI result: ${error.message}`);
       return false;
     }
   };
@@ -254,10 +278,10 @@ function MbtiTest() {
       const functions = getFunctions();
       const sendEmail = httpsCallable(functions, 'sendEmailNotification');
       const result = await sendEmail({ userId, testTakerName });
-      console.log('Email notification sent successfully', result.data);
+      customLog('Email notification sent successfully', result.data);
       return true;
     } catch (error) {
-      console.error('Error sending email notification:', error);
+      customLog('Error sending email notification:', error);
       return false;
     }
   };
@@ -325,6 +349,7 @@ function MbtiTest() {
             </button>
           </div>
         </div>
+        <LogDisplay logs={logs} />
       </div>
     );
   }
@@ -374,6 +399,7 @@ function MbtiTest() {
             </a>
           </div>
         </motion.div>
+        <LogDisplay logs={logs} />
       </div>
     );
   }
@@ -475,6 +501,7 @@ function MbtiTest() {
           Question {currentQuestion + 1} of {shuffledQuestions.length}
         </div>
       </div>
+      <LogDisplay logs={logs} />
     </div>
   );
 }
