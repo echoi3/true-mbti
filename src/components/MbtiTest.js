@@ -116,7 +116,15 @@ function MbtiTest() {
   }
 
   const handleAnswer = (value) => {
-    setAnswers({ ...answers, [shuffledQuestions[currentQuestion].id]: value });
+    const newAnswers = { ...answers, [shuffledQuestions[currentQuestion].id]: value };
+    setAnswers(newAnswers);
+
+    if (currentQuestion === shuffledQuestions.length - 1) {
+      calculateMBTI(newAnswers);
+    } else {
+      setDirection(1);
+      setCurrentQuestion(currentQuestion + 1);
+    }
   };
 
   const goToNextQuestion = () => {
@@ -135,47 +143,52 @@ function MbtiTest() {
     }
   };
 
-  const calculateMBTI = () => {
+  const calculateMBTI = (finalAnswers) => {
     const scores = { E: 0, I: 0, S: 0, N: 0, T: 0, F: 0, J: 0, P: 0 };
     
     shuffledQuestions.forEach(q => {
-      const answer = answers[q.id];
+      const answer = finalAnswers[q.id];
       const category = q.category;
       const oppositeCategory = category === 'E' ? 'I' : category === 'S' ? 'N' : category === 'T' ? 'F' : 'P';
       
-      if (answer > 4) {
+      if (answer === 7) {
         scores[category] += 2;
-      } else if (answer > 3) {
+      } else if (answer === 6) {
         scores[category] += 1;
-      } else if (answer < 3) {
+      } else if (answer === 3) {
         scores[oppositeCategory] += 1;
-      } else if (answer < 4) {
+      } else if (answer === 2 || answer === 1) {
         scores[oppositeCategory] += 2;
       }
+      // Note: answer === 4 (neutral) doesn't contribute to either category
     });
 
     const calculatePreference = (a, b) => {
-      const totalQuestions = scores[a] + scores[b];
+      const totalPoints = scores[a] + scores[b];
+      const difference = Math.abs(scores[a] - scores[b]);
       const preference = scores[a] > scores[b] ? a : b;
-      const strength = Math.round((Math.max(scores[a], scores[b]) / totalQuestions) * 100);
+      const strength = Math.round((difference / totalPoints) * 100);
       return { preference, strength };
     };
 
     const ei = calculatePreference('E', 'I');
-    const ns = calculatePreference('N', 'S');
+    const sn = calculatePreference('S', 'N');
     const tf = calculatePreference('T', 'F');
     const jp = calculatePreference('J', 'P');
 
-    const result = `${ei.preference}${ns.preference}${tf.preference}${jp.preference}`;
+    const result = ei.preference + sn.preference + tf.preference + jp.preference;
     const distribution = {
-      EI: ei.preference === 'E' ? ei.strength : 100 - ei.strength,
-      NS: ns.preference === 'N' ? ns.strength : 100 - ns.strength,
-      TF: tf.preference === 'T' ? tf.strength : 100 - tf.strength,
-      JP: jp.preference === 'J' ? jp.strength : 100 - jp.strength
+      EI: ei.strength,
+      NS: sn.strength,
+      TF: tf.strength,
+      JP: jp.strength
     };
 
     setMbtiResult(result);
     setMbtiDistribution(distribution);
+    setTestCompleted(true);
+
+    // Update user's MBTI results in the database
     updateUserMBTI(result, distribution);
   };
 
@@ -216,7 +229,6 @@ function MbtiTest() {
         averageDistribution: newAverageDistribution
       });
 
-      setTestCompleted(true);
       await sendEmailNotification(userId, userName);
     }
   };
@@ -268,15 +280,7 @@ function MbtiTest() {
                   {[1, 2, 3, 4, 5, 6, 7].map((value) => (
                     <button
                       key={value}
-                      onClick={() => {
-                        handleAnswer(value);
-                        if (currentQuestion < shuffledQuestions.length - 1) {
-                          setDirection(1);
-                          setCurrentQuestion(currentQuestion + 1);
-                        } else {
-                          calculateMBTI();
-                        }
-                      }}
+                      onClick={() => handleAnswer(value)}
                       className={`w-full py-3 px-4 rounded-lg text-lg transition-colors duration-200 flex justify-between items-center ${
                         answers[shuffledQuestions[currentQuestion].id] === value
                           ? 'bg-indigo-600 text-white'
