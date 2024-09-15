@@ -184,12 +184,15 @@ function Dashboard() {
         // Add a small delay to ensure content is rendered
         await new Promise(resolve => setTimeout(resolve, 100));
         
-        const scale = 1.1; // Increase the scale for better quality on high-DPI screens
+        const scale = 3; // Increase the scale for better quality on high-DPI screens
         const dataUrl = await toPng(shareableRef.current, {
-          quality: 10,
+          quality: 0.95, // Increase quality
           pixelRatio: scale,
-          width: 400 * scale,
-          height: 700 * scale,
+          width: 360 * scale, // Match the width of ShareableMBTIResult
+          height: 660 * scale, // Match the height of ShareableMBTIResult
+          style: {
+            backgroundColor: '#F0E6FA', // Match the background color of ShareableMBTIResult
+          },
         });
         console.log('Image generated successfully');
 
