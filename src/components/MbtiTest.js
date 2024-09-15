@@ -4,7 +4,6 @@ import { collection, query, where, getDocs, limit, doc, updateDoc, arrayUnion, g
 import { db } from '../firebaseConfig';
 import { motion, AnimatePresence } from 'framer-motion';
 import { httpsCallable, getFunctions } from 'firebase/functions';
-import LogDisplay from './LogDisplay';
 
 const questions = [
   // E/I questions
@@ -76,13 +75,6 @@ function MbtiTest() {
   const [userName, setUserName] = useState('User');
   const [direction, setDirection] = useState(1);
   const [shuffledQuestions, setShuffledQuestions] = useState([]);
-  const [logs, setLogs] = useState([]);
-
-  const customLog = (message) => {
-    const timestamp = new Date().toISOString();
-    setLogs(prevLogs => [...prevLogs, { timestamp, message }]);
-    console.log(message); // Still log to console for development
-  };
 
   useEffect(() => {
     const fetchUserData = async () => {
@@ -97,11 +89,9 @@ function MbtiTest() {
           setUserId(userDoc.id);
           setUserName(userData.name ? userData.name.split(' ')[0] : 'User');
         } else {
-          customLog('No user found with uniqueId:', uniqueId);
           setError('Invalid or expired test link. Please request a new link.');
         }
       } catch (error) {
-        customLog('Error fetching user:', error);
         setError('An error occurred while loading the test. Please try again later.');
       }
     };
@@ -193,20 +183,17 @@ function MbtiTest() {
     try {
       const updateSuccess = await updateUserMBTI(result, distribution);
       if (updateSuccess) {
-        customLog('MBTI calculation and result saving completed successfully');
+        await sendEmailNotification(userId, userName);
       } else {
-        customLog('MBTI calculation completed, but there was an issue saving the result');
+        setError('An error occurred while saving your results. Please try again later or contact support.');
       }
-      await sendEmailNotification(userId, userName);
     } catch (error) {
-      customLog(`Error in MBTI calculation: ${error.message}`);
       setError('An error occurred while processing your results. Please try again later or contact support.');
     }
   };
 
   const updateUserMBTI = async (result, distribution) => {
     if (!userId) {
-      customLog('No userId available');
       return false;
     }
 
@@ -223,7 +210,6 @@ function MbtiTest() {
     try {
       // Add the result to the mbtiResults collection
       await addDoc(mbtiResultsRef, testResult);
-      customLog('MBTI result saved successfully');
 
       // Try to update the user document
       try {
@@ -256,19 +242,17 @@ function MbtiTest() {
           };
 
           await updateDoc(userRef, updateData);
-          customLog('User MBTI updated successfully');
         } else {
-          customLog('User document not found, but MBTI result was saved');
+          console.log('User document not found, but MBTI result was saved');
         }
       } catch (userUpdateError) {
-        customLog(`Error updating user document: ${userUpdateError.message}`);
-        customLog('MBTI result was saved, but user document could not be updated');
+        console.error('Error updating user document:', userUpdateError);
+        console.log('MBTI result was saved, but user document could not be updated');
       }
 
-      // Return true even if user document update fails
       return true;
     } catch (error) {
-      customLog(`Error saving MBTI result: ${error.message}`);
+      console.error('Error saving MBTI result:', error);
       return false;
     }
   };
@@ -277,11 +261,10 @@ function MbtiTest() {
     try {
       const functions = getFunctions();
       const sendEmail = httpsCallable(functions, 'sendEmailNotification');
-      const result = await sendEmail({ userId, testTakerName });
-      customLog('Email notification sent successfully', result.data);
+      await sendEmail({ userId, testTakerName });
       return true;
     } catch (error) {
-      customLog('Error sending email notification:', error);
+      console.error('Error sending email notification:', error);
       return false;
     }
   };
@@ -349,7 +332,6 @@ function MbtiTest() {
             </button>
           </div>
         </div>
-        <LogDisplay logs={logs} />
       </div>
     );
   }
@@ -399,7 +381,6 @@ function MbtiTest() {
             </a>
           </div>
         </motion.div>
-        <LogDisplay logs={logs} />
       </div>
     );
   }
@@ -501,7 +482,6 @@ function MbtiTest() {
           Question {currentQuestion + 1} of {shuffledQuestions.length}
         </div>
       </div>
-      <LogDisplay logs={logs} />
     </div>
   );
 }
