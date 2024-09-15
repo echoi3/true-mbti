@@ -190,29 +190,33 @@ function MbtiTest() {
     setMbtiDistribution(distribution);
     setTestCompleted(true);
 
-    try {
-      await updateUserMBTI(result, distribution);
-      await sendEmailNotification(userId, userName);
-    } catch (error) {
-      console.error('Error updating user MBTI or sending email:', error);
-      setError('An error occurred while saving your results. Please try again.');
-      // Attempt to retry the update and email sending
-      setTimeout(() => retryUpdateAndNotify(result, distribution), 5000);
-    }
-  };
+    let updateSuccess = false;
+    let emailSuccess = false;
+    let retries = 3;
 
-  const retryUpdateAndNotify = async (result, distribution) => {
-    try {
-      const success = await updateUserMBTI(result, distribution);
-      if (success) {
-        await sendEmailNotification(userId, userName);
-        setError(null);
-      } else {
-        throw new Error('Failed to update user MBTI');
+    while (retries > 0 && (!updateSuccess || !emailSuccess)) {
+      try {
+        if (!updateSuccess) {
+          updateSuccess = await updateUserMBTI(result, distribution);
+        }
+        if (updateSuccess && !emailSuccess) {
+          emailSuccess = await sendEmailNotification(userId, userName);
+        }
+        if (updateSuccess && emailSuccess) {
+          break;
+        }
+      } catch (error) {
+        console.error('Error in MBTI calculation:', error);
+        retries--;
+        if (retries === 0) {
+          setError('An error occurred while saving your results. Please try again later.');
+        }
+        await new Promise(resolve => setTimeout(resolve, 1000));
       }
-    } catch (error) {
-      console.error('Error in retry:', error);
-      setError('Unable to save results or send notification. Please try again later.');
+    }
+
+    if (!updateSuccess || !emailSuccess) {
+      console.error('Failed to update MBTI or send email after multiple retries');
     }
   };
 
@@ -280,7 +284,7 @@ function MbtiTest() {
       return true;
     } catch (error) {
       console.error('Error sending email notification:', error);
-      throw error;
+      return false;
     }
   };
 
