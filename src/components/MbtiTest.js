@@ -22,7 +22,7 @@ const questions = [
   { id: 11, text: "[FIRST_NAME] often comes up with creative solutions that others might consider unconventional or 'out of the box'.", category: "N" },
   { id: 12, text: "When planning for the future, [FIRST_NAME] focuses more on potential opportunities than on practical realities.", category: "N" },
   { id: 13, text: "[FIRST_NAME] enjoys discussing abstract concepts and theories more than talking about concrete facts and experiences.", category: "N" },
-  { id: 14, text: "When reading a story, [FIRST_NAME] is more likely to:\na) Imagine various possible plot twists and character developments beyond what's written.\nb) Focus on the details and events explicitly described in the text.", category: "N" },
+  { id: 14, text: "When reading a story, [FIRST_NAME] is more likely to imagine plot twists beyond what's written than focus on explicitly described events.", category: "N" },
   { id: 15, text: "[FIRST_NAME] is more interested in exploring new, innovative ideas than perfecting existing methods.", category: "N" },
   { id: 16, text: "When explaining a concept, [FIRST_NAME] prefers to use specific examples and facts rather than metaphors or analogies.", category: "S" },
   { id: 17, text: "[FIRST_NAME] tends to trust information from personal experience more than theoretical possibilities.", category: "S" },
