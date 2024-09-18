@@ -9,6 +9,7 @@ import { useNavigate } from 'react-router-dom';
 import { signInWithPopup, GoogleAuthProvider } from 'firebase/auth';
 import { auth } from '../firebaseConfig';
 import { FormattedMessage, useIntl } from 'react-intl';
+import MBTIStats from '../components/MBTIStats';
 
 function Home() {
   const intl = useIntl();
@@ -52,6 +53,7 @@ function Home() {
         </div>
         
         <HowItWorks />
+        <MBTIStats />
       </div>
     </div>
   );

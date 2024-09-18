@@ -113,5 +113,9 @@
   "notFound.title": "페이지를 찾을 수 없습니다",
   "notFound.description": "찾으시는 페이지가 존재하지 않거나 이동되었습니다.",
   "notFound.message": "죄송합니다! 요청하신 페이지를 찾을 수 없습니다.",
-  "notFound.goHome": "홈페이지로 돌아가기"
+  "notFound.goHome": "홈페이지로 돌아가기",
+
+  "home.mbtiStats.title": "MBTI 테스트 통계",
+  "home.mbtiStats.totalTests": "총 제출된 테스트",
+  "home.mbtiStats.distribution": "MBTI 분포"
 }
