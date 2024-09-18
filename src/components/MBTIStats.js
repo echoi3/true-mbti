@@ -1,43 +1,21 @@
-import React, { useState, useEffect } from 'react';
-import { collection, getDocs } from 'firebase/firestore';
-import { db } from '../firebaseConfig';
+import React, { useEffect, useCallback } from 'react';
 import { FormattedMessage } from 'react-intl';
 import { Bar } from 'react-chartjs-2';
 import { Chart as ChartJS, CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend } from 'chart.js';
+import useMBTIStats from '../hooks/useMBTIStats';
+import { useMBTIContext } from '../contexts/MBTIContext';
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Title, Tooltip, Legend);
 
 const MBTIStats = () => {
-  const [totalTests, setTotalTests] = useState(0);
-  const [distribution, setDistribution] = useState({});
-  const [isLoading, setIsLoading] = useState(true);
+  const { totalTests, distribution, isLoading, refetchStats } = useMBTIStats();
+  const { shouldRefetch } = useMBTIContext();
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const mbtiResultsRef = collection(db, 'mbtiResults');
-        const snapshot = await getDocs(mbtiResultsRef);
-        let testCount = snapshot.size;
-        const mbtiCounts = {};
-
-        snapshot.forEach(doc => {
-          const resultData = doc.data();
-          if (resultData.result) {
-            mbtiCounts[resultData.result] = (mbtiCounts[resultData.result] || 0) + 1;
-          }
-        });
-
-        setTotalTests(testCount);
-        setDistribution(mbtiCounts);
-      } catch (error) {
-        console.error('Error fetching MBTI stats:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
-    fetchStats();
-  }, []);
+    if (shouldRefetch) {
+      refetchStats();
+    }
+  }, [shouldRefetch, refetchStats]);
 
   if (isLoading) {
     return <div>Loading stats...</div>;

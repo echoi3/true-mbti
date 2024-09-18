@@ -9,6 +9,7 @@ import Header from './components/Header';
 import Footer from './components/Footer';
 import Home from './pages/Home';
 import Breadcrumbs from './components/Breadcrumbs';
+import { MBTIProvider } from './contexts/MBTIContext';
 
 const Dashboard = lazy(() => import('./pages/Dashboard'));
 const SignUp = lazy(() => import('./pages/SignUp'));
@@ -38,37 +39,39 @@ function App() {
   }, []);
 
   return (
-    <IntlProvider messages={intl.messages} locale={locale}>
-      <AuthProvider>
-        <GoogleOAuthProvider clientId={CLIENT_ID}>
-          <Router>
-            <Helmet>
-              <html lang={locale} />
-              <title>TrueMBTI - Discover Your True Personality</title>
-              <meta name="description" content="Find out your true MBTI as seen by others. Invite friends to assess your personality traits!" />
-            </Helmet>
-            <div className="flex flex-col min-h-screen bg-gray-100">
-              <Header setLocale={setLocale} />
-              <main className="flex-grow container mx-auto p-4">
-                <div className="sr-only">
-                  <Breadcrumbs />
-                </div>
-                <Suspense fallback={<div>Loading...</div>}>
-                  <Routes>
-                    <Route path="/" element={<Home />} />
-                    <Route path="/signup" element={<SignUp />} />
-                    <Route path="/dashboard" element={<Dashboard />} />
-                    <Route path="/mbti-test/:uniqueId" element={<MbtiTest />} />
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
-                </Suspense>
-              </main>
-              <Footer />
-            </div>
-          </Router>
-        </GoogleOAuthProvider>
-      </AuthProvider>
-    </IntlProvider>
+    <MBTIProvider>
+      <IntlProvider messages={intl.messages} locale={locale}>
+        <AuthProvider>
+          <GoogleOAuthProvider clientId={CLIENT_ID}>
+            <Router>
+              <Helmet>
+                <html lang={locale} />
+                <title>TrueMBTI - Discover Your True Personality</title>
+                <meta name="description" content="Find out your true MBTI as seen by others. Invite friends to assess your personality traits!" />
+              </Helmet>
+              <div className="flex flex-col min-h-screen bg-gray-100">
+                <Header setLocale={setLocale} />
+                <main className="flex-grow container mx-auto p-4">
+                  <div className="sr-only">
+                    <Breadcrumbs />
+                  </div>
+                  <Suspense fallback={<div>Loading...</div>}>
+                    <Routes>
+                      <Route path="/" element={<Home />} />
+                      <Route path="/signup" element={<SignUp />} />
+                      <Route path="/dashboard" element={<Dashboard />} />
+                      <Route path="/mbti-test/:uniqueId" element={<MbtiTest />} />
+                      <Route path="*" element={<NotFound />} />
+                    </Routes>
+                  </Suspense>
+                </main>
+                <Footer />
+              </div>
+            </Router>
+          </GoogleOAuthProvider>
+        </AuthProvider>
+      </IntlProvider>
+    </MBTIProvider>
   );
 }
 

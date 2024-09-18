@@ -2,46 +2,49 @@ import React, { useState, useEffect } from 'react';
 import { collection, getDocs } from 'firebase/firestore';
 import { db } from '../firebaseConfig';
 import { motion } from 'framer-motion';
+import { useMBTIContext } from '../contexts/MBTIContext';
 
 const MBTIDistribution = () => {
   const [distribution, setDistribution] = useState({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
+  const { shouldRefetch } = useMBTIContext();
+
+  const fetchDistribution = async () => {
+    setIsLoading(true);
+    try {
+      const usersRef = collection(db, 'users');
+      const snapshot = await getDocs(usersRef);
+      const mbtiCounts = {};
+      
+      snapshot.forEach(doc => {
+        const userData = doc.data();
+        if (userData.averageMBTI) {
+          mbtiCounts[userData.averageMBTI] = (mbtiCounts[userData.averageMBTI] || 0) + 1;
+        }
+      });
+
+      const total = Object.values(mbtiCounts).reduce((sum, count) => sum + count, 0);
+      if (total > 0) {
+        const distributionPercentages = Object.entries(mbtiCounts).reduce((acc, [mbti, count]) => {
+          acc[mbti] = (count / total) * 100;
+          return acc;
+        }, {});
+        setDistribution(distributionPercentages);
+      } else {
+        setError('No MBTI data available yet.');
+      }
+    } catch (error) {
+      console.error('Error fetching MBTI distribution:', error);
+      setError('Error fetching MBTI distribution. Please try again later.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    const fetchDistribution = async () => {
-      try {
-        const usersRef = collection(db, 'users');
-        const snapshot = await getDocs(usersRef);
-        const mbtiCounts = {};
-        
-        snapshot.forEach(doc => {
-          const userData = doc.data();
-          if (userData.averageMBTI) {
-            mbtiCounts[userData.averageMBTI] = (mbtiCounts[userData.averageMBTI] || 0) + 1;
-          }
-        });
-
-        const total = Object.values(mbtiCounts).reduce((sum, count) => sum + count, 0);
-        if (total > 0) {
-          const distributionPercentages = Object.entries(mbtiCounts).reduce((acc, [mbti, count]) => {
-            acc[mbti] = (count / total) * 100;
-            return acc;
-          }, {});
-          setDistribution(distributionPercentages);
-        } else {
-          setError('No MBTI data available yet.');
-        }
-      } catch (error) {
-        console.error('Error fetching MBTI distribution:', error);
-        setError('Error fetching MBTI distribution. Please try again later.');
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchDistribution();
-  }, []);
+  }, [shouldRefetch]);
 
   if (isLoading) {
     return (
