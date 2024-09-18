@@ -18,8 +18,10 @@
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
     "react-firebase-hooks": "^5.1.1",
+    "react-helmet": "^6.1.0",
     "react-intl": "^6.6.8",
     "react-leaflet": "^4.2.1",
+    "react-router-breadcrumbs-hoc": "^4.1.0",
     "react-router-dom": "^6.11.2",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
@@ -30,7 +32,8 @@
     "test": "react-scripts test",
     "eject": "react-scripts eject",
     "deploy:function": "npx supabase functions deploy --project-ref hcsksmvmnvvezrpalhyr",
-    "restart": "kill-port 3000 && npm start"
+    "restart": "kill-port 3000 && npm start",
+    "generate-sitemap": "node generateSitemap.js"
   },
   "eslintConfig": {
     "extends": [
