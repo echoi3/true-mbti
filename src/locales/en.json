@@ -1,5 +1,6 @@
 {
     "app.title": "TrueMBTI",
+    "test.title": "MBTI Test for {firstName}",
     "test.question": "Question {number} of {total}",
     "test.complete": "{percentage}% complete",
     "result.title": "Wecome, {name}!",

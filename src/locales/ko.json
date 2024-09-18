@@ -1,5 +1,6 @@
 {
     "app.title": "TrueMBTI",
+    "test.title": "{firstName}님을 위한 MBTI 테스트",
     "test.question": "질문 {number}/{total}",
     "test.complete": "{percentage}% 완료",
     "result.title": "안녕하세요, {name}님!",
