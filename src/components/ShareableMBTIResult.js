@@ -1,6 +1,9 @@
 import React from 'react';
+import { FormattedMessage, useIntl } from 'react-intl';
 
 function ShareableMBTIResult({ mbtiResult, mbtiDistribution, getMbtiEmoji, getMbtiDescription, userName, testTakerCount }) {
+  const intl = useIntl();
+
   const renderDistributionBar = (leftLabel, rightLabel, percentage, leftLetter, rightLetter) => {
     const leftPercentage = parseFloat(percentage).toFixed(1);
     const rightPercentage = (100 - parseFloat(percentage)).toFixed(1);
@@ -11,7 +14,7 @@ function ShareableMBTIResult({ mbtiResult, mbtiDistribution, getMbtiEmoji, getMb
       <div className="mb-3">
         <div className="flex justify-between text-sm mb-1">
           <span className="font-bold">{leftLetter} - {leftLabel}</span>
-          <span className="font-bold">{rightLabel} - {rightLetter}</span>
+          <span className="font-bold">{rightLetter} - {rightLabel}</span>
         </div>
         <div className="flex h-6 rounded-full overflow-hidden relative">
           <div 
@@ -42,7 +45,9 @@ function ShareableMBTIResult({ mbtiResult, mbtiDistribution, getMbtiEmoji, getMb
     <div className="flex items-center justify-center" style={{ width: '400px', height: '700px' }}>
       <div className="bg-white rounded-lg overflow-hidden" style={{ width: '360px', height: '680px' }}>
         <div className="bg-indigo-600 px-4 py-3">
-          <h1 className="text-xl font-bold text-white text-center">{firstName}'s True MBTI</h1>
+          <h1 className="text-xl font-bold text-white text-center">
+            <FormattedMessage id="shareableMBTI.yourTrueMBTI" values={{ name: firstName }} />
+          </h1>
         </div>
         <div className="p-4 flex flex-col justify-between" style={{ height: 'calc(680px - 3rem)' }}>
           <div>
@@ -51,20 +56,39 @@ function ShareableMBTIResult({ mbtiResult, mbtiDistribution, getMbtiEmoji, getMb
                 <span className="text-3xl">{getMbtiEmoji(mbtiResult)}</span>
               </div>
               <div className="text-3xl font-bold text-indigo-800 mt-2">{mbtiResult}</div>
-              <p className="text-sm text-gray-600 mt-2 text-center">
-                According to {testTakerCount} {testTakerCount === 1 ? 'individual' : 'individuals'} who took the MBTI test on behalf of {firstName}
+              <p className="text-sm text-gray-600 mt-2">
+                <FormattedMessage 
+                  id="result.description" 
+                  values={{ name: firstName, count: testTakerCount }}
+                />
               </p>
             </div>
-            <p className="text-center text-indigo-600 mb-6 text-sm font-bold">
-              {getMbtiDescription(mbtiResult)}
+            <p className="text-indigo-600 mb-6 text-sm font-bold">
+              <FormattedMessage id={`mbti.description.${mbtiResult}`} />
             </p>
-            {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI, 'E', 'I')}
-            {renderDistributionBar('Intuitive', 'Observant', mbtiDistribution.NS, 'N', 'S')}
-            {renderDistributionBar('Thinking', 'Feeling', mbtiDistribution.TF, 'T', 'F')}
-            {renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP, 'J', 'P')}
+            {renderDistributionBar(
+              intl.formatMessage({id: 'mbti.trait.extroverted'}),
+              intl.formatMessage({id: 'mbti.trait.introverted'}),
+              mbtiDistribution.EI, 'E', 'I'
+            )}
+            {renderDistributionBar(
+              intl.formatMessage({id: 'mbti.trait.intuitive'}),
+              intl.formatMessage({id: 'mbti.trait.observant'}),
+              mbtiDistribution.NS, 'N', 'S'
+            )}
+            {renderDistributionBar(
+              intl.formatMessage({id: 'mbti.trait.thinking'}),
+              intl.formatMessage({id: 'mbti.trait.feeling'}),
+              mbtiDistribution.TF, 'T', 'F'
+            )}
+            {renderDistributionBar(
+              intl.formatMessage({id: 'mbti.trait.judging'}),
+              intl.formatMessage({id: 'mbti.trait.prospecting'}),
+              mbtiDistribution.JP, 'J', 'P'
+            )}
           </div>
           <p className="text-center text-indigo-600 mt-4 text-base">
-            Find out your true MBTI at <span className="font-bold">truembti.com</span>
+            {intl.formatMessage({ id: "shareable.findOutMore" })}
           </p>
         </div>
       </div>

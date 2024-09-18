@@ -7,8 +7,10 @@ import { generateUniqueUrl } from '../utils/urlGenerator';
 import { motion } from 'framer-motion';
 import { toPng } from 'html-to-image';
 import ShareableMBTIResult from '../components/ShareableMBTIResult';
+import { useIntl, FormattedMessage } from 'react-intl';
 
 function Dashboard() {
+  const intl = useIntl();
   const navigate = useNavigate();
   const [userData, setUserData] = useState(null);
   const [uniqueUrl, setUniqueUrl] = useState(null);
@@ -146,7 +148,7 @@ function Dashboard() {
     const rightPercentage = (100 - parseFloat(percentage)).toFixed(1);
     const isLeftDominant = parseFloat(leftPercentage) > 50;
     const dominantPercentage = isLeftDominant ? leftPercentage : rightPercentage;
-
+  
     return (
       <div className="mb-4">
         <div className="flex justify-between text-sm mb-1">
@@ -257,25 +259,31 @@ function Dashboard() {
           transition={{ duration: 0.5 }}
           className="bg-white shadow-xl rounded-lg overflow-hidden"
         >
-          <div className="bg-indigo-600 px-4 py-3">
-            <h1 className="text-2xl font-bold text-white">Dashboard</h1>
-          </div>
+          
           {userData && (
+            <div>
+              <div className="bg-indigo-600 px-4 py-3">
+            <h1 className="text-2xl font-bold text-white">
+            <FormattedMessage id="result.title" values={{ name: userData.name.split(' ')[0] }} />
+            </h1>
+          </div>
             <div className="px-4 py-3">
-              <h2 className="text-xl font-bold mb-2">Welcome, {userData.name.split(' ')[0]}!</h2>
+              
               <p className="text-sm text-gray-600 mb-4">Email: {userData.email}</p>
               <p className="text-base font-semibold text-indigo-600 mb-2">
-                {submissionCount === 0 
-                  ? "Share your MBTI test link with others so that they can submit the test for you!"
-                  : submissionCount === 1 
-                    ? "1 amazing individual has submitted a test for you" 
-                    : `${submissionCount} amazing individuals have submitted tests for you`}
+                <FormattedMessage
+                  id="result.description"
+                  values={{ name: userData.name.split(' ')[0], count: submissionCount }}
+                />
               </p>
+            </div>
             </div>
           )}
           {mbtiResult && mbtiDistribution && (
             <div ref={mbtiResultRef} className="bg-indigo-50 rounded-lg p-6 mt-2 mb-6">
-              <h3 className="text-xl font-semibold text-indigo-800 mb-4">Your True MBTI:</h3>
+              <h3 className="text-xl font-semibold text-indigo-800 mb-4">
+                <FormattedMessage id="dashboard.yourTrueMBTI" />
+              </h3>
               <div className="flex flex-col items-center justify-center mb-6">
                 <div className="w-20 h-20 rounded-full bg-indigo-200 flex items-center justify-center mb-2">
                   <span className="text-3xl">{getMbtiEmoji(mbtiResult)}</span>
@@ -285,21 +293,23 @@ function Dashboard() {
                 </div>
               </div>
               <p className="text-center text-indigo-600 font-medium mb-6">
-                {getMbtiDescription(mbtiResult)}
+                <FormattedMessage id={`mbti.description.${mbtiResult}`} />
               </p>
-              {renderDistributionBar('Extroverted', 'Introverted', mbtiDistribution.EI, 'E', 'I')}
-              {renderDistributionBar('Intuitive', 'Observant', mbtiDistribution.NS, 'N', 'S')}
-              {renderDistributionBar('Thinking', 'Feeling', mbtiDistribution.TF, 'T', 'F')}
-              {renderDistributionBar('Judging', 'Prospecting', mbtiDistribution.JP, 'J', 'P')}
+              {renderDistributionBar(intl.formatMessage({id: 'mbti.trait.extroverted'}), intl.formatMessage({id: 'mbti.trait.introverted'}), mbtiDistribution.EI, 'E', 'I')}
+              {renderDistributionBar(intl.formatMessage({id: 'mbti.trait.intuitive'}), intl.formatMessage({id: 'mbti.trait.observant'}), mbtiDistribution.NS, 'N', 'S')}
+              {renderDistributionBar(intl.formatMessage({id: 'mbti.trait.thinking'}), intl.formatMessage({id: 'mbti.trait.feeling'}), mbtiDistribution.TF, 'T', 'F')}
+              {renderDistributionBar(intl.formatMessage({id: 'mbti.trait.judging'}), intl.formatMessage({id: 'mbti.trait.prospecting'}), mbtiDistribution.JP, 'J', 'P')}
             </div>
           )}
           {uniqueUrl && (
             <div className="bg-indigo-50 rounded-lg p-4 mb-6">
-              <h3 className="text-lg font-medium text-indigo-800 mb-2">Your unique MBTI test URL:</h3>
+              <h3 className="text-lg font-medium text-indigo-800 mb-2">
+                <FormattedMessage id="dashboard.uniqueTestURL" />
+              </h3>
               <div className="flex items-center mb-2">
                 <input
                   type="text"
-                  value={uniqueUrl || 'Generating URL...'}
+                  value={uniqueUrl || intl.formatMessage({ id: 'dashboard.generateURL' })}
                   readOnly
                   className="flex-grow bg-white border border-gray-300 rounded-l-md py-2 px-4 text-gray-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 min-w-0"
                 />
@@ -308,7 +318,7 @@ function Dashboard() {
                   disabled={!uniqueUrl}
                   className="bg-indigo-600 text-white rounded-r-md px-4 py-2 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 whitespace-nowrap flex-shrink-0 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  Copy
+                  <FormattedMessage id="dashboard.copy" />
                 </button>
               </div>
               {copySuccess && (
@@ -316,7 +326,9 @@ function Dashboard() {
                   <svg className="w-5 h-5 mr-2" fill="currentColor" viewBox="0 0 20 20">
                     <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
                   </svg>
-                  <span className="font-medium">URL copied successfully!</span>
+                  <span className="font-medium">
+                    <FormattedMessage id="dashboard.urlCopied" />
+                  </span>
                 </div>
               )}
             </div>
@@ -344,14 +356,14 @@ function Dashboard() {
               disabled={!mbtiResult || !mbtiDistribution}
               className="w-full bg-green-600 text-white rounded-md px-4 py-2 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 mb-3 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              Share My Result
+              <FormattedMessage id="result.share" />
             </button>
 
             <button
               onClick={handleSignOut}
               className="w-full bg-red-600 text-white rounded-md px-4 py-2 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500 focus:ring-offset-2"
             >
-              Sign Out
+              <FormattedMessage id="result.signOut" />
             </button>
           </div>
         </motion.div>
