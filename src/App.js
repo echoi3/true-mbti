@@ -50,7 +50,9 @@ function App() {
             <div className="flex flex-col min-h-screen bg-gray-100">
               <Header setLocale={setLocale} />
               <main className="flex-grow container mx-auto p-4">
-                <Breadcrumbs />
+                <div className="sr-only">
+                  <Breadcrumbs />
+                </div>
                 <Suspense fallback={<div>Loading...</div>}>
                   <Routes>
                     <Route path="/" element={<Home />} />
