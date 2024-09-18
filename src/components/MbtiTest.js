@@ -293,7 +293,7 @@ function MbtiTest() {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-b from-indigo-100 to-purple-100 px-4 py-8">
         <div className="w-full max-w-lg bg-white rounded-lg shadow-xl p-6 md:p-8">
-          <h1 className="text-2xl md:text-3xl font-bold text-indigo-600 mb-6 text-center">
+          <h1 className="text-xl md:text-3xl font-bold text-indigo-600 mb-6 text-center">
           <FormattedMessage id="test.title" values={{ firstName: userName }} />
           </h1>
           <div className="flex items-center justify-between text-sm text-gray-600 mb-4">
