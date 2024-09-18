@@ -1,26 +1,41 @@
 import React from 'react';
-import { Link } from 'react-router-dom';
-import withBreadcrumbs from 'react-router-breadcrumbs-hoc';
+import { Link, useLocation } from 'react-router-dom';
 import { FormattedMessage } from 'react-intl';
 
 const routes = [
   { path: '/', breadcrumb: 'Home' },
   { path: '/signup', breadcrumb: 'Sign Up' },
   { path: '/dashboard', breadcrumb: 'Dashboard' },
-  { path: '/mbti-test/:uniqueId', breadcrumb: 'MBTI Test' },
+  { path: '/mbti-test', breadcrumb: 'MBTI Test' },
 ];
 
-const Breadcrumbs = ({ breadcrumbs }) => (
-  <nav className="text-sm text-gray-500 mb-4">
-    {breadcrumbs.map(({ breadcrumb, match }, index) => (
-      <span key={match.url}>
-        <Link to={match.url}>
-          <FormattedMessage id={`breadcrumb.${breadcrumb}`} defaultMessage={breadcrumb} />
-        </Link>
-        {index < breadcrumbs.length - 1 && <span className="mx-2">/</span>}
-      </span>
-    ))}
-  </nav>
-);
+const Breadcrumbs = () => {
+  const location = useLocation();
+  const pathnames = location.pathname.split('/').filter((x) => x);
 
-export default withBreadcrumbs(routes)(Breadcrumbs);
+  return (
+    <nav className="text-sm text-gray-500 mb-4">
+      <Link to="/"><FormattedMessage id="breadcrumb.Home" defaultMessage="Home" /></Link>
+      {pathnames.map((value, index) => {
+        const to = `/${pathnames.slice(0, index + 1).join('/')}`;
+        const route = routes.find(r => r.path === to);
+        const isLast = index === pathnames.length - 1;
+
+        return route ? (
+          <span key={to}>
+            <span className="mx-2">/</span>
+            {isLast ? (
+              <FormattedMessage id={`breadcrumb.${route.breadcrumb}`} defaultMessage={route.breadcrumb} />
+            ) : (
+              <Link to={to}>
+                <FormattedMessage id={`breadcrumb.${route.breadcrumb}`} defaultMessage={route.breadcrumb} />
+              </Link>
+            )}
+          </span>
+        ) : null;
+      })}
+    </nav>
+  );
+};
+
+export default Breadcrumbs;

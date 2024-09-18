@@ -21,7 +21,6 @@
     "react-helmet": "^6.1.0",
     "react-intl": "^6.6.8",
     "react-leaflet": "^4.2.1",
-    "react-router-breadcrumbs-hoc": "^4.1.0",
     "react-router-dom": "^6.11.2",
     "react-scripts": "5.0.1",
     "web-vitals": "^2.1.4"
