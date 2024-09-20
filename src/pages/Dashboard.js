@@ -270,12 +270,27 @@ function Dashboard() {
             <div className="px-4 py-3">
               
               <p className="text-sm text-gray-600 mb-4">Email: {userData.email}</p>
-              <p className="text-base font-semibold text-indigo-600 mb-2">
-                <FormattedMessage
-                  id="result.description"
-                  values={{ name: userData.name.split(' ')[0], count: submissionCount }}
-                />
-              </p>
+              {submissionCount === 0 ? (
+                <div className="bg-indigo-50 rounded-lg p-4 mb-6">
+                  <h3 className="text-lg font-medium text-indigo-800 mb-2">
+                    <FormattedMessage id="dashboard.getStarted" />
+                  </h3>
+                  <p className="text-base text-indigo-600 mb-4">
+                    <FormattedMessage id="dashboard.noTestsYet" />
+                  </p>
+                  <ol className="list-decimal list-inside space-y-2">
+                    <li><FormattedMessage id="howItWorks.step3.description" /></li>
+                    <li><FormattedMessage id="howItWorks.step4.description" /></li>
+                  </ol>
+                </div>
+              ) : (
+                <p className="text-base font-semibold text-indigo-600 mb-2">
+                  <FormattedMessage
+                    id="result.description"
+                    values={{ name: userData.name.split(' ')[0], count: submissionCount }}
+                  />
+                </p>
+              )}
             </div>
             </div>
           )}

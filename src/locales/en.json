@@ -19,7 +19,7 @@
     "mbti.description.ENFP": "Warmly enthusiastic and imaginative, seeing life as full of possibilities.",
     "mbti.description.ENTP": "Quick-witted, inventive, and outspoken, constantly generating stimulating ideas.",
     "mbti.description.ISTJ": "Quiet, diligent, and dependable, achieving success through thoroughness and reliability.",
-    "mbti.description.ISFJ": "Quiet, friendly, and deeply responsible, devoted to their duties and others’ well-being.",
+    "mbti.description.ISFJ": "Quiet, friendly, and deeply responsible, devoted to their duties and others' well-being.",
     "mbti.description.INFJ": "Intuitive and empathetic, seeking meaning in relationships and ideas while guiding others toward positive growth.",
     "mbti.description.INTJ": "Original thinkers with great drive, focused on implementing ideas and achieving strategic goals.",
     "mbti.description.ISTP": "Observant and adaptable, acting swiftly to solve problems when they arise.",
@@ -117,5 +117,8 @@
 
   "home.mbtiStats.title": "MBTI Test Statistics",
   "home.mbtiStats.totalTests": "Total Tests Submitted",
-  "home.mbtiStats.distribution": "MBTI Distribution"
+  "home.mbtiStats.distribution": "MBTI Distribution",
+
+  "dashboard.getStarted": "Get Started with TrueMBTI",
+  "dashboard.noTestsYet": "You haven't received any MBTI test results yet. Here's how to get started:"
 }
