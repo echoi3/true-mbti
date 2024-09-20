@@ -48,7 +48,7 @@
   "howItWorks.step2.title": "링크 생성",
   "howItWorks.step2.description": "친구나 가족이 여러분을 위해 완료할 수 있는 고유한 테스트 링크를 만드세요.",
   "howItWorks.step3.title": "공유하기",
-  "howItWorks.step3.description": "여러분을 잘 아는 분에게 링크를 보내 MBTI 테스트를 해주도록 하세요.",
+  "howItWorks.step3.description": "여러분을 잘 아시는 분에게 링크를 보내 MBTI 테스트를 해주도록 하세요.",
   "howItWorks.step4.title": "분석하기",
   "howItWorks.step4.description": "실시간으로 업데이트되는 여러분의 MBTI를 확인하세요.",
   "signUp.withGoogle": "Google로 가입하기",
@@ -120,5 +120,7 @@
   "home.mbtiStats.distribution": "MBTI 분포",
 
   "dashboard.getStarted": "TrueMBTI 시작하기",
-"dashboard.noTestsYet": "아직 MBTI 테스트 결과를 받지 않았습니다. 다음과 같이 시작하세요:"
+"dashboard.noTestsYet": "아직 MBTI 테스트 결과를 받지 않으셨습니다. 다음과 같이 시작하세요:",
+"howItWorks.dashboard.description": "여러분을 잘 아시는 분에게 아래의 링크를 보내 MBTI 테스트를 해주도록 하세요."
+
 }

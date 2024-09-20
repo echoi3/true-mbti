@@ -279,7 +279,7 @@ function Dashboard() {
                     <FormattedMessage id="dashboard.noTestsYet" />
                   </p>
                   <ol className="list-decimal list-inside space-y-2">
-                    <li><FormattedMessage id="howItWorks.step3.description" /></li>
+                    <li><FormattedMessage id="howItWorks.dashboard.description" /></li>
                     <li><FormattedMessage id="howItWorks.step4.description" /></li>
                   </ol>
                 </div>

@@ -120,5 +120,7 @@
   "home.mbtiStats.distribution": "MBTI Distribution",
 
   "dashboard.getStarted": "Get Started with TrueMBTI",
-  "dashboard.noTestsYet": "You haven't received any MBTI test results yet. Here's how to get started:"
+  "dashboard.noTestsYet": "You haven't received any MBTI test results yet. Here's how to get started:",
+  "howItWorks.dashboard.description": "Send the link below to someone who knows you well to take the test for you."
+
 }
