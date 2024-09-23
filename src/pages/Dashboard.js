@@ -5,7 +5,7 @@ import { doc, getDoc, collection, query, where, getDocs } from 'firebase/firesto
 import { signOut } from 'firebase/auth';
 import { generateUniqueUrl } from '../utils/urlGenerator';
 import { motion } from 'framer-motion';
-import { toPng } from 'html-to-image';
+import { toCanvas } from 'html-to-image';
 import ShareableMBTIResult from '../components/ShareableMBTIResult';
 import { useIntl, FormattedMessage } from 'react-intl';
 
@@ -185,21 +185,29 @@ function Dashboard() {
         
         // Add a small delay to ensure content is rendered
         await new Promise(resolve => setTimeout(resolve, 100));
+        console.log('Delay completed');
         
         const scale = 2; // Increase the scale for better quality on high-DPI screens
-        const dataUrl = await toPng(shareableRef.current, {
+        console.log('Starting toCanvas conversion');
+        const canvas = await toCanvas(shareableRef.current, {
           quality: 10,
           pixelRatio: scale,
           width: 220 * scale,
           height: 380 * scale,
+          cacheBust: true,
+          skipFonts: true, // Skip embedding fonts to avoid CSP issues
         });
-        console.log('Image generated successfully');
+        console.log('Canvas generated successfully');
+
+        const blob = await new Promise(resolve => canvas.toBlob(resolve, 'image/png'));
+        console.log('Blob created:', blob);
+
+        const blobUrl = URL.createObjectURL(blob);
+        console.log('Blob URL created:', blobUrl);
 
         if (navigator.share) {
           console.log('Web Share API is available');
           try {
-            const response = await fetch(dataUrl);
-            const blob = await response.blob();
             const file = new File([blob], 'my-mbti-result.png', { type: 'image/png' });
             await navigator.share({
               files: [file],
@@ -208,26 +216,21 @@ function Dashboard() {
             });
             console.log('MBTI result shared successfully');
           } catch (error) {
+            console.error('Error in share process:', error);
             if (error.name === 'AbortError') {
-              console.log('Share cancelled by user');
+              console.log('Share was aborted by the user');
             } else {
-              console.error('Error sharing MBTI result:', error);
-              // Fallback to download for desktop
-              const link = document.createElement('a');
-              link.download = 'my-mbti-result.png';
-              link.href = dataUrl;
-              link.click();
+              fallbackToDownload(blobUrl);
             }
           }
         } else {
           console.log('Web Share API not available, falling back to download');
-          const link = document.createElement('a');
-          link.download = 'my-mbti-result.png';
-          link.href = dataUrl;
-          link.click();
+          fallbackToDownload(blobUrl);
         }
       } catch (error) {
-        console.error('Error generating image:', error);
+        console.error('Error in image generation process:', error);
+        // Fallback to text sharing if image generation fails
+        fallbackToTextShare();
       }
     } else {
       console.error('MBTI result, distribution, or user data is not available, or shareableRef is null');
@@ -235,6 +238,27 @@ function Dashboard() {
       console.log('mbtiResult:', mbtiResult);
       console.log('mbtiDistribution:', mbtiDistribution);
       console.log('userData:', userData);
+    }
+  };
+
+  const fallbackToDownload = (blobUrl) => {
+    const link = document.createElement('a');
+    link.href = blobUrl;
+    link.download = 'my-mbti-result.png';
+    link.click();
+    URL.revokeObjectURL(blobUrl);
+    console.log('Download initiated');
+  };
+
+  const fallbackToTextShare = () => {
+    const text = `My MBTI Result: ${mbtiResult}\nCheck out my result at: ${uniqueUrl}`;
+    if (navigator.share) {
+      navigator.share({
+        title: 'My MBTI Result',
+        text: text,
+      }).catch(console.error);
+    } else {
+      alert('Copy this text to share:\n\n' + text);
     }
   };
 
