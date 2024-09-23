@@ -293,7 +293,6 @@ function Dashboard() {
           </div>
             <div className="px-4 py-3">
               
-              <p className="text-sm text-gray-600 mb-4">Email: {userData.email}</p>
               {submissionCount === 0 ? (
                 <div className="bg-indigo-50 rounded-lg p-4 mb-6">
                   <h3 className="text-lg font-medium text-indigo-800 mb-2">
